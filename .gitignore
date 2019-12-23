@@ -1,0 +1,11 @@
+# vim
+.*.swp
+.*.swo
+
+# node.js
+node_modules
+
+# package managers
+pnpm-lock.yaml
+yarn.lock
+npm-lock.json
