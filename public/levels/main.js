@@ -8,10 +8,10 @@ export class MainLevel {
     await Water.load();
   }
 
-  constructor () {
-    this.scene = new THREE.Scene();
+  constructor (ctx) {
+    this.scene = ctx.scene = new THREE.Scene();
 
-    this.camera = new THREE.PerspectiveCamera(
+    this.camera = ctx.camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
@@ -21,6 +21,10 @@ export class MainLevel {
 
     // background
     this.scene.background = new THREE.Color(0x202020);
+    // XXX: uses a partial context just for this object that
+    // we know will work
+    this.water = new Water(ctx);
+    
 
     // lighting
     const hemi = new THREE.HemisphereLight(0x443333, 0x111122);
@@ -43,9 +47,8 @@ export class MainLevel {
     const instance = Type(scene);
   }
 
-  tick(ctx) {
-    this.position.x = ctx.camera.position.x;
-    this.position.y = ctx.camera.position.y;
+  tick(ctx, delta) {
+    this.water.tick(ctx, delta);
   }
 };
 
