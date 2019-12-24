@@ -11,6 +11,8 @@ const backgroundMat = new THREE.Material(
 const backgroundGeom = new THREE.PlaneGeometry(0, 0, 1);
 const background = new THREE.Mesh(backgroundGeom, backgroundMat);
 
+export const textureLoader = new THREE.TextureLoader();
+
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -40,8 +42,15 @@ const tickLogic = () => {
   cube.rotation.y += 0.01;
 };
 
+const clock = new THREE.Clock();
+
+export const globalUniforms = {
+  time: { value: 0 }
+};
+
 const run = () => {
   const tickGame = () => {
+    globalUniforms.time.value += clock.getDelta();
     requestAnimationFrame(tickEngine); // causes async feedback loop
     tickLogic();
     renderer.render(scene, camera);
