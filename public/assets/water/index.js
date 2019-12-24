@@ -1,15 +1,6 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.js";
 
-
-const backgroundImg = new THREE.TextureLoader().load("images/water.png");
-const backgroundMat = new THREE.Material(
-
-);
-
-const backgroundGeom = new THREE.PlaneGeometry();
-const background = new THREE.Mesh(backgroundGeom, backgroundMat);
-
 // a good reason to use webpack...
 const [
   vertShader,
