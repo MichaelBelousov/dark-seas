@@ -11,7 +11,7 @@ const backgroundMat = new THREE.Material(
 const backgroundGeom = new THREE.PlaneGeometry(0, 0, 1);
 const background = new THREE.Mesh(backgroundGeom, backgroundMat);
 
-export const textureLoader = new THREE.TextureLoader();
+const textureLoader = new THREE.TextureLoader();
 
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -25,6 +25,14 @@ const renderer = new THREE.WebGLRenderer(); // TODO: use WeblGL2?
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+renderer.domElement.addEventListener('keydown', event => {
+  const key = event.key;
+  if(key === "w"){
+    gameState.boat.taught = 1;
+  } else if(key === "s") {
+    gameState.boat.taught = -1;
+  }
+});
 
 // sample geom, will replace with boat soon
 
@@ -38,24 +46,35 @@ const engineStartTime = Date.now();
 let lastFrameTime = engineStartTime;
 
 const tickLogic = () => {
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  cube.rotation.y += gameState.boat.till * .5;
+  cube.y += gameState.boat.taught;
 };
 
 const clock = new THREE.Clock();
 
-export const globalUniforms = {
+const globalUniforms = {
   time: { value: 0 }
 };
 
 const run = () => {
   const tickGame = () => {
     globalUniforms.time.value += clock.getDelta();
-    requestAnimationFrame(tickEngine); // causes async feedback loop
+    requestAnimationFrame(tickGame); // causes async feedback loop
     tickLogic();
     renderer.render(scene, camera);
   };
   tickGame();
+};
+
+const gameState = {
+  boat: {
+    velocity: new THREE.Vector2(0, 1),
+    till: 0.5,
+    taught: 0.5,
+  },
+  wind: {
+    speed: 0.5
+  }
 };
 
 run();
