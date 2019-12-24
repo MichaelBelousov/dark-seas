@@ -4,13 +4,7 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import Water from "./assets/water/index.js";
 import MainLevel from "./levels/main.js";
 
-console.log(THREE);
-window.THREE = THREE;
-console.log(THREE.Scene);
-
-const scene = new THREE.Scene();
-
-const textureLoader = new THREE.TextureLoader();
+//const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -77,6 +71,16 @@ const gameState = {
   wind: {
     speed: new THREE.Vector2(0, 0),
   }
+};
+
+const textureLoader = new THREE.TextureLoader();
+
+const gameContext = {
+  state: gameState,
+  level: new MainLevel(),
+  get scene() { return this.level.scene },
+  get camera() { return this.level.camera },
+  textureLoader,
 };
 
 run();
