@@ -13,3 +13,6 @@ npm-lock.json
 # blender
 *.blend1
 *.blend2
+
+# krita
+*.kra~
