@@ -5,18 +5,25 @@ class MainLevel {
   constructor () {
     this.scene = new THREE.Scene();
 
+    this.camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    this.camera.position.z = 5;
+
     // background
-    //scene.add(waterMesh);
-    scene.background = new THREE.Color(0x000000);
+    this.scene.background = new THREE.Color(0xff0000);
 
     // lighting
     const hemi = new THREE.HemisphereLight(0x443333, 0x111122);
-    scene.add(hemi);
+    this.scene.add(hemi);
 
     const spot1 = new THREE.SpotLight(0xffffbb, 2);
     spot1.position.set(0.5, 0, 1);
     spot1.position.multiplyScalar(700);
-    scene.add(spot1);
+    this.scene.add(spot1);
     spot1.castShadow = true;
     spot1.shadow.mapSize.height = 1024;
     spot1.shadow.mapSize.width = 1024;

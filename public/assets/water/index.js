@@ -2,10 +2,22 @@
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import { globalUniforms } from "../../index.js";
 
+let resources = {
+  vertShader:  {
+    value: undefined,
+    loaded: false,
+    path: './vert.glsl',
+  },
+  fragShader: {
+    value: undefined,
+    loaded: false,
+    path: './frag.glsl'
+  }
+};
 let vertShader, fragShader;
 
 // basic actor setup
-class Water {
+export class Water {
   constructor (ctx) {
 
     this.uniforms = new Proxy({
@@ -42,13 +54,13 @@ class Water {
 const load = async () => {
   // a good reason to use webpack...
   // avoiding this async loading garbage
-  [
-    vertShader,
-    fragShader
-  ] = await (Promise.all([
-    fetch('./vert.glsl'),
-    fetch('./frag.glsl')
-  ])).map(f => f.text());
+  await Promise.all(Object.values(resources).map(async (r) => {
+    if (!r.loaded) {
+      const resp = await fetch(r.path);
+      r.value = resp.text();
+      r.loaded = true;
+    }
+  }));
 };
 
 export default load;
