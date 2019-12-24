@@ -1,7 +1,13 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
+import Water from "/assets/water/index.js";
 
-class MainLevel {
+export class MainLevel {
+
+  static async load() {
+    await Water.load();
+  }
+
   constructor () {
     this.scene = new THREE.Scene();
 
@@ -14,7 +20,7 @@ class MainLevel {
     this.camera.position.z = 5;
 
     // background
-    this.scene.background = new THREE.Color(0xff0000);
+    this.scene.background = new THREE.Color(0x202020);
 
     // lighting
     const hemi = new THREE.HemisphereLight(0x443333, 0x111122);
@@ -31,7 +37,6 @@ class MainLevel {
     spot1.shadow.camera.far = 1500;
     spot1.shadow.camera.fov = 40;
     spot1.shadow.bias = -0.005;
-
   }
 
   spawn(Type) {

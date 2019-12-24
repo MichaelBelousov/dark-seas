@@ -1,7 +1,7 @@
 
 //import THREE from "three.js";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
-import LoadWater, { Water } from "./assets/water/index.js";
+import Water from "./assets/water/index.js";
 import MainLevel from "./levels/main.js";
 
 //const scene = new THREE.Scene();
@@ -63,8 +63,7 @@ const gameContext = {
   renderer,
 };
 
-//scene.add(cube);
-
+gameContext.scene.add(cube);
 
 const run = () => {
   const tickGame = () => {
@@ -78,7 +77,7 @@ const run = () => {
 
 
 (async () => {
-  await LoadWater();
+  await Water.load();
   run();
 })();
 

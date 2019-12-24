@@ -14,10 +14,21 @@ let resources = {
     path: './frag.glsl'
   }
 };
-let vertShader, fragShader;
 
 // basic actor setup
-export class Water {
+class Water {
+  static async load() {
+    // a good reason to use webpack...
+    // avoiding this async loading garbage
+    await Promise.all(Object.values(resources).map(async (r) => {
+      if (!r.loaded) {
+        const resp = await fetch(r.path);
+        r.value = resp.text();
+        r.loaded = true;
+      }
+    }));
+  }
+
   constructor (ctx) {
 
     this.uniforms = new Proxy({
@@ -35,8 +46,8 @@ export class Water {
 
     this.material = new THREE.ShaderMaterial({
       uniforms: this.uniforms,
-      vertexShader: vertShader.body,
-      fragmentShader: fragShader.body
+      vertexShader: resources.vertShader.value,
+      fragmentShader: resources.fragShader.value
     });
 
     const size = 0.65;
@@ -51,17 +62,5 @@ export class Water {
   }
 };
 
-const load = async () => {
-  // a good reason to use webpack...
-  // avoiding this async loading garbage
-  await Promise.all(Object.values(resources).map(async (r) => {
-    if (!r.loaded) {
-      const resp = await fetch(r.path);
-      r.value = resp.text();
-      r.loaded = true;
-    }
-  }));
-};
-
-export default load;
+export default Water;
 
