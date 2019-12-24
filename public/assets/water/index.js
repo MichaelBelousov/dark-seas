@@ -37,8 +37,8 @@ class Water {
       fogDensity: { value: 0.2 },
       fogColor: { value: new THREE.Vector3(0, 0, 0) },
       uvScale: { value: new THREE.Vector2(1.0, 1.0) },
-      texture1: { value: ctx.textureLoader.load('noise.png') },
-      texture2: { value: ctx.textureLoader.load('bubbles.png') },
+      texture1: { value: ctx.textureLoader.load(resolve('noise.png')) },
+      texture2: { value: ctx.textureLoader.load(resolve('bubbles.png')) },
     }, { 
       get: (uniforms, key) => ((key in uniforms) ? uniforms : globalUniforms)[key],
     });
@@ -56,10 +56,9 @@ class Water {
   }
 
   tick(ctx, delta = 0) {
+    //replace with position.set(...camera.pos.xy)
     this.mesh.position.x = ctx.camera.position.x;
     this.mesh.position.y = ctx.camera.position.y;
-    this.mesh.rotation.x += 0.2 * delta;
-    this.mesh.rotation.x += 0.2 * delta;
   }
 };
 
