@@ -1,6 +1,12 @@
 
 //import THREE from "three.js";
-const THREE = window.THREE;
+import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
+import Water from "./assets/water/index.js";
+import MainLevel from "./levels/main.js";
+
+console.log(THREE);
+window.THREE = THREE;
+console.log(THREE.Scene);
 
 const scene = new THREE.Scene();
 
@@ -14,15 +20,17 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 5;
 
-const renderer = new THREE.WebGLRenderer(); // TODO: use WeblGL2?
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+renderer.autoClear = false;
 
-renderer.domElement.addEventListener('keydown', event => {
-  const key = event.key;
-  if(key === "w"){
+renderer.domElement.addEventListener('keydown', e => {
+  e.preventDefault(); //prevent native scroll handling?
+  const { key } = e;
+  if (key === "w"){
     gameState.boat.taught = 1;
-  } else if(key === "s") {
+  } else if (key === "s") {
     gameState.boat.taught = -1;
   }
 });
@@ -45,7 +53,7 @@ const tickLogic = () => {
 
 const clock = new THREE.Clock();
 
-const globalUniforms = {
+export const globalUniforms = {
   time: { value: 0 }
 };
 
@@ -62,11 +70,12 @@ const run = () => {
 const gameState = {
   boat: {
     velocity: new THREE.Vector2(0, 1),
-    till: 0.5,
-    taught: 0.5,
+    till: 0.5, // 0-1, 100%left-100%right
+    taught: 0.5, //0-1, 0:full slack-1:no slack
+    sailOrientation: new THREE.Vector2(1,0),
   },
   wind: {
-    speed: 0.5
+    speed: new THREE.Vector2(0, 0),
   }
 };
 

@@ -1,12 +1,12 @@
 
-import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.js";
+import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 
 class MainLevel {
   constructor () {
     this.scene = new THREE.Scene();
 
     // background
-    scene.add(waterMesh?);
+    //scene.add(waterMesh);
     scene.background = new THREE.Color(0x000000);
 
     // lighting
@@ -34,7 +34,7 @@ class MainLevel {
   tick(ctx) {
     this.position.x = ctx.camera.position.x;
     this.position.y = ctx.camera.position.y;
-  },
+  }
 };
 
 export default MainLevel;
