@@ -4,13 +4,6 @@ const THREE = window.THREE;
 
 const scene = new THREE.Scene();
 
-const backgroundImg = new THREE.TextureLoader().load("images/water.png");
-const backgroundMat = new THREE.Material(
-
-);
-const backgroundGeom = new THREE.PlaneGeometry(0, 0, 1);
-const background = new THREE.Mesh(backgroundGeom, backgroundMat);
-
 const textureLoader = new THREE.TextureLoader();
 
 const camera = new THREE.PerspectiveCamera(
