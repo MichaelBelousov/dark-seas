@@ -9,3 +9,7 @@ node_modules
 pnpm-lock.yaml
 yarn.lock
 npm-lock.json
+
+# blender
+*.blend1
+*.blend2

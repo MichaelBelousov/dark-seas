@@ -12,14 +12,14 @@ const [
 
 // basic actor setup
 class Water {
-  static async build(ctx) {
+  static async register(ctx) {
     this.uniforms = {
       fogDensity: { value: 0.2 },
       fogColor: { value: new THREE.Vector3(0, 0, 0) },
       time: { value: 1.0 },
       uvScale: { value: new THREE.Vector2(1.0, 1.0) },
-      texture1: { value: ctx.textureLoader.load('textures/noise.png') },
-      texture2: { value: ctx.textureLoader.load('textures/water.png') },
+      texture1: { value: ctx.textureLoader.load('noise.png') },
+      texture2: { value: ctx.textureLoader.load('water.png') },
     };
     this.uniforms.texture1.value.wrapS = this.uniforms.texture1.value.wrapT = THREE.RepeatWrapping;
     this.uniforms.texture2.value.wrapS = this.uniforms.texture2.value.wrapT = THREE.RepeatWrapping;
