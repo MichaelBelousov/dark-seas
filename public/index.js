@@ -4,6 +4,13 @@ const THREE = window.THREE;
 
 const scene = new THREE.Scene();
 
+const backgroundImg = new THREE.TextureLoader().load("images/water.png");
+const backgroundMat = new THREE.Material(
+
+);
+const backgroundGeom = new THREE.PlaneGeometry(0, 0, 1);
+const background = new THREE.Mesh(backgroundGeom, backgroundMat);
+
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -12,7 +19,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 5;
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer(); // TODO: use WeblGL2?
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -25,11 +32,22 @@ const cube = new THREE.Mesh(geom, material);
 
 scene.add(cube);
 
-const animate = () => {
-  // infinite frame pumping, may want to try something more async
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+const engineStartTime = Date.now();
+let lastFrameTime = engineStartTime;
+
+const tickLogic = () => {
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
 };
-animate();
+
+const run = () => {
+  const tickGame = () => {
+    requestAnimationFrame(tickEngine); // causes async feedback loop
+    tickLogic();
+    renderer.render(scene, camera);
+  };
+  tickGame();
+};
+
+run();
+
