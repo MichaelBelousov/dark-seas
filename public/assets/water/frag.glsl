@@ -3,6 +3,7 @@
 uniform float time;
 uniform vec2 lightPos;
 uniform float lightIntensity;
+uniform float lightRadius;
 uniform float fogDensity; // TODO: remove?
 uniform vec3 fogColor; // TODO: remove?
 //uniform vec2 waterDir;
@@ -41,12 +42,11 @@ void main( void ) {
   float caustics2 = texture2D(texture2, causticsUvs2).x;
 
   // mix layers
-  float caustics = addBlacks(caustics1, caustics2, 0.03, 0.02);
+  float caustics = addBlacks(caustics1, caustics2, 0.06, 0.03);
 
   // lighting
-  float radius = 1.0;
-  float thisIntensity = clamp(
-    radius - distance(pos, lightPos),
+  float thisIntensity = lightIntensity * clamp(
+    lightRadius - distance(pos, lightPos),
     0.0, 1.0
   );
   gl_FragColor = fromBw(caustics * thisIntensity);

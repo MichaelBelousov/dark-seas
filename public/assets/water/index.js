@@ -37,7 +37,8 @@ class Water {
     this.uniforms = {
       time: { value: 0 },
       lightPos: { value: new THREE.Vector2(0.0, 0.0) },
-      lightIntensity: { value: 1.0},
+      lightIntensity: { value: 2.0 },
+      lightRadius: { value: 0.6 },
       fogDensity: { value: 0.2 },
       fogColor: { value: new THREE.Vector3(0, 0, 0) },
       uvScale: { value: new THREE.Vector2(1.0, 1.0) },
