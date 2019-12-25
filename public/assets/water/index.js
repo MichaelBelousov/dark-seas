@@ -40,7 +40,7 @@ class Water {
       fogColor: { value: new THREE.Vector3(0, 0, 0) },
       uvScale: { value: new THREE.Vector2(1.0, 1.0) },
       texture1: { value: ctx.textureLoader.load(resolve('perlin.png')) },
-      texture2: { value: ctx.textureLoader.load(resolve('bubbles.png')) },
+      texture2: { value: ctx.textureLoader.load(resolve('water_caustic.png')) },
     };
     this.uniforms.texture1.value.wrapS = this.uniforms.texture1.value.wrapT = THREE.RepeatWrapping;
     this.uniforms.texture2.value.wrapS = this.uniforms.texture2.value.wrapT = THREE.RepeatWrapping;
@@ -51,7 +51,7 @@ class Water {
       fragmentShader: resources.fragShader.value
     });
 
-    this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(20, 20, 1, 1), this.material);
+    this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(10, 10, 1, 1), this.material);
     ctx.scene.add(this.mesh);
   }
 

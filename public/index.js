@@ -64,6 +64,12 @@ export const globalUniforms = {
     camera: level.camera,
   };
 
+  window.addEventListener('resize', () => {
+    ctx.camera.aspect = window.innerWidth/window.innerHeight;
+    ctx.camera.updateProjectionMatrix();
+    ctx.renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
   const tickLogic = (delta) => {
     level.tick(ctx, delta);
   };
