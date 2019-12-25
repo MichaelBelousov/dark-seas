@@ -1,5 +1,6 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
+// unfortunately proxying values doesn't work for uniforms
 import { globalUniforms } from "../../index.js";
 
 const resolve = path => '/assets/water/' + path;
@@ -33,15 +34,14 @@ class Water {
 
   constructor (ctx) {
 
-    this.uniforms = new Proxy({
+    this.uniforms = {
+      time: { value: 0 },
       fogDensity: { value: 0.2 },
       fogColor: { value: new THREE.Vector3(0, 0, 0) },
       uvScale: { value: new THREE.Vector2(1.0, 1.0) },
       texture1: { value: ctx.textureLoader.load(resolve('noise.png')) },
       texture2: { value: ctx.textureLoader.load(resolve('bubbles.png')) },
-    }, { 
-      get: (uniforms, key) => ((key in uniforms) ? uniforms : globalUniforms)[key],
-    });
+    };
     this.uniforms.texture1.value.wrapS = this.uniforms.texture1.value.wrapT = THREE.RepeatWrapping;
     this.uniforms.texture2.value.wrapS = this.uniforms.texture2.value.wrapT = THREE.RepeatWrapping;
 
@@ -51,7 +51,7 @@ class Water {
       fragmentShader: resources.fragShader.value
     });
 
-    this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(3, 3, 1, 1), this.material);
+    this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(20, 20, 1, 1), this.material);
     ctx.scene.add(this.mesh);
   }
 
@@ -59,6 +59,7 @@ class Water {
     //replace with position.set(...camera.pos.xy)
     this.mesh.position.x = ctx.camera.position.x;
     this.mesh.position.y = ctx.camera.position.y;
+    this.uniforms.time.value += delta;
   }
 };
 

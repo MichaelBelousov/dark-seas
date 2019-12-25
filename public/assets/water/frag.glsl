@@ -3,14 +3,15 @@
 uniform float time;
 uniform float fogDensity;
 uniform vec3 fogColor;
-uniform sampler2D texture1; // TODO: base texture
-uniform sampler2D texture2; // TODO: projection noise
+uniform sampler2D texture1; // TODO: noise
+uniform sampler2D texture2; // TODO: bubbles
 
 varying vec2 vUv;
 
 void main( void ) {
   vec2 position = - 1.0 + 2.0 * vUv;
-  vec4 noise = texture2D( texture1, vUv );
+  vec2 noiseUvs = vec2(0.3,0.3) * vUv;
+  vec4 noise = texture2D( texture1, noiseUvs );
   vec2 T1 = vUv + vec2( 1.5, - 1.5 ) * time * 0.02;
   vec2 T2 = vUv + vec2( - 0.5, 2.0 ) * time * 0.01;
   T1.x += noise.x * 2.0;
