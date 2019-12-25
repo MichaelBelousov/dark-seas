@@ -1,8 +1,10 @@
 // water fragment shader
 
 uniform float time;
-uniform float fogDensity;
-uniform vec3 fogColor;
+uniform vec2 lightPos;
+uniform float lightIntensity;
+uniform float fogDensity; // TODO: remove?
+uniform vec3 fogColor; // TODO: remove?
 //uniform vec2 waterDir;
 uniform sampler2D texture1; // TODO: noise
 uniform sampler2D texture2; // TODO: caustic
@@ -18,7 +20,7 @@ vec4 fromBw(float a) {
 }
 
 void main( void ) {
-  vec2 position = - 1.0 + 2.0 * vUv;
+  vec2 pos = - 1.0 + 2.0 * vUv;
 
   // caustics coord noise
   vec2 noiseMotion = 1.0 * vec2(0.1 * time, 0.1 * time);
@@ -40,5 +42,12 @@ void main( void ) {
 
   // mix layers
   float caustics = addBlacks(caustics1, caustics2, 0.03, 0.02);
-  gl_FragColor = fromBw(caustics);
+
+  // lighting
+  float radius = 1.0;
+  float thisIntensity = clamp(
+    radius - distance(pos, lightPos),
+    0.0, 1.0
+  );
+  gl_FragColor = fromBw(caustics * thisIntensity);
 }
