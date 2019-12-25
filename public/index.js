@@ -29,11 +29,6 @@ export const globalUniforms = {
 
   // sample geom, will replace with boat soon
 
-  const geom = new THREE.BoxGeometry(1, 1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  const cube = new THREE.Mesh(geom, material);
-  cube.position.x += 2; //move out of the way
-
   const clock = new THREE.Clock();
 
   const gameState = {
@@ -69,11 +64,7 @@ export const globalUniforms = {
     camera: level.camera,
   };
 
-  ctx.scene.add(cube);
-
   const tickLogic = (delta) => {
-    cube.rotation.y += gameState.boat.till * .5;
-    cube.y += gameState.boat.taught;
     level.tick(ctx, delta);
   };
 

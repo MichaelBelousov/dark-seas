@@ -39,7 +39,7 @@ class Water {
       fogDensity: { value: 0.2 },
       fogColor: { value: new THREE.Vector3(0, 0, 0) },
       uvScale: { value: new THREE.Vector2(1.0, 1.0) },
-      texture1: { value: ctx.textureLoader.load(resolve('noise.png')) },
+      texture1: { value: ctx.textureLoader.load(resolve('perlin.png')) },
       texture2: { value: ctx.textureLoader.load(resolve('bubbles.png')) },
     };
     this.uniforms.texture1.value.wrapS = this.uniforms.texture1.value.wrapT = THREE.RepeatWrapping;
