@@ -20,10 +20,15 @@ export const globalUniforms = {
   renderer.domElement.addEventListener('keydown', e => {
     e.preventDefault(); //prevent native scroll handling?
     const { key } = e;
-    if (key === "w"){
-      gameState.boat.taught = 1;
-    } else if (key === "s") {
-      gameState.boat.taught = -1;
+    if (key === "w" && gameState.boat.taught <= 15) {
+      gameState.boat.taught += 0.01;
+    } else if (key === "s" && gameState.boat.taught >= -15) {
+      gameState.boat.taught += -0.01;
+    } else if (key === "a") {
+      cube.rotation.z = -0.1;
+      console.log("key fired");
+    } else if (key === "d" && gameState.boat.till <= 15) {
+      gameState.boat.till += 0.1;
     }
   });
 
@@ -31,17 +36,19 @@ export const globalUniforms = {
 
   const clock = new THREE.Clock();
 
+  //Game State object to control variables
   const gameState = {
     boat: {
       velocity: new THREE.Vector2(0, 1),
-      till: 0.5, // 0-1, 100%left-100%right
-      taught: 0.5, //0-1, 0:full slack-1:no slack
-      sailOrientation: new THREE.Vector2(1,0),
+      till: 0.0, // 0-1, 100%left-100%right
+      taught: 0.05, //0-1, 0:full slack-1:no slack
+      sailOrientation: new THREE.Vector2(1, 0),
     },
     wind: {
       speed: new THREE.Vector2(0, 0),
     }
   };
+
 
   const textureLoader = new THREE.TextureLoader();
 
@@ -65,7 +72,7 @@ export const globalUniforms = {
   };
 
   window.addEventListener('resize', () => {
-    ctx.camera.aspect = window.innerWidth/window.innerHeight;
+    ctx.camera.aspect = window.innerWidth / window.innerHeight;
     ctx.camera.updateProjectionMatrix();
     ctx.renderer.setSize(window.innerWidth, window.innerHeight);
   });
@@ -75,9 +82,18 @@ export const globalUniforms = {
   };
 
   const run = () => {
+
+    var geometry = new THREE.BoxGeometry(1, 1, 1);
+    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    var cube = new THREE.Mesh(geometry, material);
+    ctx.scene.add(cube);
+
     const tickGame = () => {
       const delta = clock.getDelta();
       globalUniforms.time.value += delta;
+
+      cube.rotation.z += gameState.boat.till;
+
       requestAnimationFrame(tickGame); // causes async feedback loop
       tickLogic(delta);
       renderer.render(ctx.scene, ctx.camera);
