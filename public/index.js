@@ -4,10 +4,6 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import MainLevel from "./levels/main.js";
 
 
-export const globalUniforms = {
-  time: { value: 0 }
-};
-
 (async () => {
   await MainLevel.load();
 
@@ -77,7 +73,6 @@ export const globalUniforms = {
   const run = () => {
     const tickGame = () => {
       const delta = clock.getDelta();
-      globalUniforms.time.value += delta;
       requestAnimationFrame(tickGame); // causes async feedback loop
       tickLogic(delta);
       renderer.render(ctx.scene, ctx.camera);

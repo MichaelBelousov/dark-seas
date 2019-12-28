@@ -1,11 +1,13 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import Water from "/assets/water/index.js";
+import Boat from "/assets/boat/index.js";
 
 export class MainLevel {
 
   static async load() {
     await Water.load();
+    await Boat.load();
   }
 
   constructor (ctx) {
@@ -24,6 +26,7 @@ export class MainLevel {
     // XXX: uses a partial context just for this object that
     // we know will work
     this.water = new Water(ctx);
+    this.boat = new Boat(ctx);
     
 
     // lighting

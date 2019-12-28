@@ -42,12 +42,14 @@ void main( void ) {
   float caustics2 = texture2D(texture2, causticsUvs2).x;
 
   // mix layers
-  float caustics = addBlacks(caustics1, caustics2, 0.06, 0.03);
+  float caustics = addBlacks(caustics1, caustics2, 0.16, 0.09);
 
   // lighting
-  float thisIntensity = lightIntensity * clamp(
-    lightRadius - distance(pos, lightPos),
+  float falloff = 2.0;
+  float mask = float((lightRadius - distance(pos, lightPos)) > 0.0);
+  float intensity = lightIntensity * clamp(
+    pow(lightRadius - distance(pos, lightPos), falloff),
     0.0, 1.0
-  );
-  gl_FragColor = fromBw(caustics * thisIntensity);
+  ) *  mask;
+  gl_FragColor = fromBw(caustics * intensity);
 }
