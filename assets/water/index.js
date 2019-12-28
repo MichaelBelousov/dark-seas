@@ -1,7 +1,7 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 
-const resolve = path => '/assets/water/' + path;
+const resolve = path => './assets/water/' + path;
 
 let resources = {
   vertShader:  {

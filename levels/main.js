@@ -1,7 +1,7 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
-import Water from "/assets/water/index.js";
-import Boat from "/assets/boat/index.js";
+import Water from "../assets/water/index.js";
+import Boat from "../assets/boat/index.js";
 
 export class MainLevel {
 

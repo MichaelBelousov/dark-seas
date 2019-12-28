@@ -3,7 +3,7 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/DRACOLoader.js";
 
-const resolve = path => '/assets/boat/' + path;
+const resolve = path => './assets/boat/' + path;
 
 let resources = {
   vertShader:  {
@@ -64,9 +64,7 @@ class Boat {
   }
 
   tick(ctx, delta = 0) {
-    //replace with position.set(...camera.pos.xy)
-    this.mesh.rotation.x += delta * 0.01;
-    this.mesh.rotation.y = delta * 0.01;
+    this.root.rotation.x += delta * 0.5;
     this.uniforms.time.value += delta;
   }
 };
