@@ -52,6 +52,7 @@ export class MainLevel {
 
   tick(ctx, delta) {
     this.water.tick(ctx, delta);
+    this.boat.tick(ctx, delta);
   }
 };
 

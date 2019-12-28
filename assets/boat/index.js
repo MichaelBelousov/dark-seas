@@ -43,8 +43,9 @@ class Boat {
 
     const result = gltfLoader.load(resources.model.path,
       gltf => {
-        console.log(gltf);
-        ctx.scene.add(gltf.scene);
+        this.root = gltf.scene;
+        ctx.scene.add(this.root);
+        console.log(this.root.children);
       },
       console.log,
       err => {
