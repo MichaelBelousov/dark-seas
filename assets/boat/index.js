@@ -18,8 +18,15 @@ let resources = {
   },
   model: {
     loaded: true, // HACK
-    path: resolve('boat.glb'),
+    path: resolve('boat.gltf'),
   }
+};
+
+// TODO: move to math util module
+const rotateVecZ = (vec, theta) => {
+  const cos = Math.cos(theta), sin = Math.sin(theta);
+  const { x, y, z } = vec;
+  return THREE.Vector3(x*cos - y*sin, x*sin + y*cos, z);
 };
 
 // basic actor setup
@@ -45,7 +52,7 @@ class Boat {
       gltf => {
         this.root = gltf.scene;
         ctx.scene.add(this.root);
-        console.log(this.root.children);
+        this.root.scale.multiplyScalar(0.2);
       },
       console.log,
       err => {
@@ -63,9 +70,40 @@ class Boat {
     };
   }
 
+  tickPhysics(ctx, delta) {
+    const {
+      windVelocity: windV,
+      seaVelocity: seaV
+    } = ctx.state.world;
+    const {
+      boatOrientation: boatDir,
+      tillerValue,
+      boomOrientation: boomDir,
+      mass,
+      velocity,
+      position,
+    } = ctx.state.boat;
+
+    const boomNorm = rotateVecZ(boomDir, Math.PI/4);
+
+    const windPush = -2 * (boomNorm.dot(windV)).multiply(boomNorm) + windV;
+
+    const boatTillerMinAngle = Math.PI/, boatTillerMaxAngle = ;
+    const tillerAngle = -boatDir
+
+    const forces = windPush + tillerPush;
+
+    const acceleration = forces / mass;
+    const newVelocity = velocity + acceleration * delta;
+    const newPosition = position + velocity * delta;
+
+    this.root.position = newPosition;
+  }
+
   tick(ctx, delta = 0) {
-    this.root.rotation.x += delta * 0.5;
+    //this.root.rotation.x += delta * 0.5;
     this.uniforms.time.value += delta;
+    tickPhysics(ctx, delta);
   }
 };
 
