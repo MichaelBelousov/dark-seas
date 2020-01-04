@@ -24,12 +24,6 @@ let resources = {
 
 // TODO: move to math util module
 
-const rotateVecZ = (vec, theta) => {
-  const cos = Math.cos(theta), sin = Math.sin(theta);
-  const { x, y, z } = vec;
-  return THREE.Vector3(x*cos - y*sin, x*sin + y*cos, z);
-};
-
 // smoothly cap a curve with a maximum upper bound
 const smoothClampCurve = (value, max) => {
   //not sure why 4 seems to give it a linear proportion, should do the math, maybe it's close to
@@ -45,6 +39,11 @@ const smoothClampCurve = (value, max) => {
 
 const incidentVec = (vec, norm) => {
   return 2 * (norm.dot(vec)).multiply(norm) + vec;
+};
+
+const forwardVec = (euler) => {
+  const quat = euler.toQuaternion();
+  quat.setFrom
 };
 
 // basic actor setup
@@ -90,39 +89,51 @@ class Boat {
 
   tickPhysics(ctx, delta) {
     const {
-      windVelocity: windV,
-      seaVelocity: seaV
-    } = ctx.state.world;
-    const {
-      boatOrientation: boatDir,
-      tillerLevel,
-      boomOrientation: boomDir,
-      mass,
-      velocity,
-      position,
-    } = ctx.state.boat;
+      wind: {
+        velocity: windV,
+      },
+      sea: {
+        velocity: seaV,
+      },
+      boat: {
+        mass: boatMass,
+        velocity,
+        position,
+        rotation: boatRot,
+        boomRotation: boomRot,
+        tillerMass: tillMass,
+        controls: {
+          mainshaftTautPercent: mainshaftValue,
+          tillerFromLeftPercent: tillValue,
+        }
+      }
+    } = ctx.state;
 
-    // XXX: boomDir must be normalized
-    const boomNorm = rotateVecZ(boomDir, Math.PI/4);
+    const origin = new THREE.Vector3();
+    const xAxis = new THREE.Vector2(1, 0);
+    const boatDir = xAxis.clone().rotateAround(origin, boatRot);
 
+    const zAxis = new THREE.Vector3(0, 0, 1);
+    const rotateAroundZ = (v, theta) => v.clone().applyAxisAngle(zAxis, theta);
+    const rotateAroundZ2 = (v, theta) => v.clone().rotateAround(origin, theta);
+
+    const boomDir = xAxis.clone().rotateAround(origin, boomRot);
+    const boomNorm = rotateAroundZ(boomDir, Math.PI/4).normalize();
     const windPush = -incidentVec(windV, boomNorm);
 
-    const tillerMinAngle = -Math.PI/3, tillerMaxAngle = Math.PI/3;
-    const tillerMin = rotateVecZ(boatDir.multiplyScalar(-1), tillerMinAngle),
-    const tillerMax = rotateVecZ(boatDir.multiplyScalar(-1), tillerMaxAngle);
-    const tillerDir = tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar()
-    const tillerNorm = rotateVecZ(tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar()
+    const tillMinAngle = -Math.PI/3, tillMaxAngle = Math.PI/3;
+    const tillMin = rotateAroundZ(boatDir.multiplyScalar(-1), tillMinAngle);
+    const tillMax = rotateAroundZ(boatDir.multiplyScalar(-1), tillMaxAngle);
+    const tillAngularRange = tillMaxAngle - tillMinAngle;
+    const tillDir = rotateAroundZ(tillMin, tillValue * tillAngularRange).normalize();
+    const tillNorm = rotateAroundZ(tillDir, Math.PI/4); // may need to reflect
 
     const waterRelativeVelocity = seaV - velocity;
 
     // TODO: need to reflect normal?
-    const tillerPush = incidentVec(waterRelativeVelocity, tillerNorm);
+    const tillPush = incidentVec(waterRelativeVelocity, tillNorm);
 
-    const boatMassProportion = 0.9;
-    const boatMass = boatMassProportion * mass;
-    const tillerMass = (1 - boatMassProportion) * mass;
-
-    const acceleration = windPush/boatMass + tillerPush/tillerMass;
+    const acceleration = windPush/boatMass + tillPush/tillMass;
 
     // simulate drag with smoothing and clamping
     const maxVelocity = 5;
@@ -138,7 +149,7 @@ class Boat {
   tick(ctx, delta = 0) {
     //this.root.rotation.x += delta * 0.5;
     this.uniforms.time.value += delta;
-    tickPhysics(ctx, delta);
+    this.tickPhysics(ctx, delta);
   }
 };
 
