@@ -29,16 +29,16 @@ const smoothClampCurve = (value, max) => {
   //not sure why 4 seems to give it a linear proportion, should do the math, maybe it's close to
   //a multiple of E
   const func = (x, m) => m - m/(Math.E ** ((4/m) * x));
-  if (value instanceof THREE.Vector3) {
-    const { x, y, z } = value;
-    if (!(max instanceof THREE.Vector3)) max = new THREE.Vector3(max, max, max);
-    return Three.Vector3(func(x, max.x), func(y, max.y), func(z, max.z));
+  if (value instanceof THREE.Vector2) {
+    const { x, y } = value;
+    if (!(max instanceof THREE.Vector2)) max = new THREE.Vector2(max, max);
+    return new THREE.Vector2(func(x, max.x), func(y, max.y));
   }
   return func(value, max);
 };
 
 const incidentVec = (vec, norm) => {
-  return 2 * (norm.dot(vec)).multiply(norm) + vec;
+  return norm.multiplyScalar(2 * norm.dot(vec)).add(vec);
 };
 
 const forwardVec = (euler) => {
@@ -69,7 +69,8 @@ class Boat {
       gltf => {
         this.root = gltf.scene;
         ctx.scene.add(this.root);
-        this.root.scale.multiplyScalar(0.2);
+        this.root.scale.multiplyScalar(0.5);
+        //= new THREE.CubeMesh();
       },
       console.log,
       err => {
@@ -88,6 +89,7 @@ class Boat {
   }
 
   tickPhysics(ctx, delta) {
+    if (!this.root) return;
     const {
       wind: {
         velocity: windV,
@@ -109,17 +111,20 @@ class Boat {
       }
     } = ctx.state;
 
-    const origin = new THREE.Vector3();
+    // TODO: thanks to mutable vectors, state-wise this is a mess...
+    // be careful reusing a variable for now, we 'll just clone a lot soon
+
+    const origin = new THREE.Vector2();
     const xAxis = new THREE.Vector2(1, 0);
     const boatDir = xAxis.clone().rotateAround(origin, boatRot);
 
     const zAxis = new THREE.Vector3(0, 0, 1);
-    const rotateAroundZ = (v, theta) => v.clone().applyAxisAngle(zAxis, theta);
-    const rotateAroundZ2 = (v, theta) => v.clone().rotateAround(origin, theta);
+    const rotateAroundZ = (v, theta) => v.clone().rotateAround(origin, theta);
+    const rotateAroundZ3 = (v, theta) => v.clone().applyAxisAngle(zAxis, theta);
 
     const boomDir = xAxis.clone().rotateAround(origin, boomRot);
     const boomNorm = rotateAroundZ(boomDir, Math.PI/4).normalize();
-    const windPush = -incidentVec(windV, boomNorm);
+    const windPush = incidentVec(windV, boomNorm).multiplyScalar(-1);
 
     const tillMinAngle = -Math.PI/3, tillMaxAngle = Math.PI/3;
     const tillMin = rotateAroundZ(boatDir.multiplyScalar(-1), tillMinAngle);
@@ -128,22 +133,22 @@ class Boat {
     const tillDir = rotateAroundZ(tillMin, tillValue * tillAngularRange).normalize();
     const tillNorm = rotateAroundZ(tillDir, Math.PI/4); // may need to reflect
 
-    const waterRelativeVelocity = seaV - velocity;
+    const waterRelativeVelocity = seaV.clone().sub(velocity);
 
-    // TODO: need to reflect normal?
+    // TODO: need to reflect normal over boat forward axis?
     const tillPush = incidentVec(waterRelativeVelocity, tillNorm);
 
-    const acceleration = windPush/boatMass + tillPush/tillMass;
+    const acceleration = windPush.clone().divideScalar(boatMass).add(tillPush.clone().divideScalar(tillMass));
 
     // simulate drag with smoothing and clamping
     const maxVelocity = 5;
-    const rawNextVelocity = velocity + acceleration * delta;
+    const rawNextVelocity = velocity.clone().add(acceleration.multiplyScalar(delta));
     const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
 
     ctx.state.boat.velocity = smoothedNextVelocity;
-    const newPosition = position + smoothedNextVelocity * delta;
+    const { x, y } = position.add(smoothedNextVelocity.multiplyScalar(delta));
 
-    this.root.position = newPosition;
+    this.root.position.set(x, y, 0.0);
   }
 
   tick(ctx, delta = 0) {
