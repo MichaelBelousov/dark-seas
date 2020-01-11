@@ -12,24 +12,6 @@ import MainLevel from "./levels/main.js";
   document.body.appendChild(renderer.domElement);
   renderer.autoClear = false;
 
-  // TODO: move to some input handling file maybe
-  renderer.domElement.addEventListener('keydown', e => {
-    e.preventDefault(); //prevent native scroll handling?
-    const { key } = e;
-    if (key === "w" && gameState.boat.taught <= 15) {
-      gameState.boat.taught += 0.01;
-    } else if (key === "s" && gameState.boat.taught >= -15) {
-      gameState.boat.taught += -0.01;
-    } else if (key === "a") {
-      cube.rotation.z = -0.1;
-      console.log("key fired");
-    } else if (key === "d" && gameState.boat.till <= 15) {
-      gameState.boat.till += 0.1;
-    }
-  });
-
-  // sample geom, will replace with boat soon
-
   const clock = new THREE.Clock();
 
   //Game State object to control variables

@@ -2,12 +2,14 @@
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
+import Player from "../assets/player/index.js";
 
 export class MainLevel {
 
   static async load() {
     await Water.load();
     await Boat.load();
+    await Player.load();
   }
 
   constructor (ctx) {
@@ -27,6 +29,7 @@ export class MainLevel {
     // we know will work
     this.water = new Water(ctx);
     this.boat = new Boat(ctx);
+    this.player = new Player(ctx);
     
 
     // lighting
@@ -53,6 +56,7 @@ export class MainLevel {
   tick(ctx, delta) {
     this.water.tick(ctx, delta);
     this.boat.tick(ctx, delta);
+    this.player.tick(ctx, delta);
   }
 };
 
