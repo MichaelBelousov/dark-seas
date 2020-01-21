@@ -107,11 +107,12 @@ class Boat {
 
     const windPush = -incidentVec(windV, boomNorm);
 
-    const tillerMinAngle = -Math.PI/3, tillerMaxAngle = Math.PI/3;
-    const tillerMin = rotateVecZ(boatDir.multiplyScalar(-1), tillerMinAngle),
+    const tillerMinAngle = -Math.PI/3;
+    const tillerMaxAngle = Math.PI/3;
+    const tillerMin = rotateVecZ(boatDir.multiplyScalar(-1), tillerMinAngle);
     const tillerMax = rotateVecZ(boatDir.multiplyScalar(-1), tillerMaxAngle);
-    const tillerDir = tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar()
-    const tillerNorm = rotateVecZ(tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar()
+    const tillerDir = tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar();
+    const tillerNorm = rotateVecZ(tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar());
 
     const waterRelativeVelocity = seaV - velocity;
 
