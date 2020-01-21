@@ -12,36 +12,28 @@ import MainLevel from "./levels/main.js";
   document.body.appendChild(renderer.domElement);
   renderer.autoClear = false;
 
-  // TODO: move to some input handling file maybe
-  renderer.domElement.addEventListener('keydown', e => {
-    e.preventDefault(); //prevent native scroll handling?
-    const { key } = e;
-    if (key === "w" && gameState.boat.taught <= 15) {
-      gameState.boat.taught += 0.01;
-    } else if (key === "s" && gameState.boat.taught >= -15) {
-      gameState.boat.taught += -0.01;
-    } else if (key === "a") {
-      cube.rotation.z = -0.1;
-      console.log("key fired");
-    } else if (key === "d" && gameState.boat.till <= 15) {
-      gameState.boat.till += 0.1;
-    }
-  });
-
-  // sample geom, will replace with boat soon
-
   const clock = new THREE.Clock();
 
   //Game State object to control variables
   const gameState = {
     boat: {
+      controls: {
+        tillerFromLeftPercent: 0.0, // 0-1, 100%left-100%right
+        mainshaftTautPercent: 0.5, //0-1, 0:full slack-1:no slack
+      },
       velocity: new THREE.Vector2(0, 1),
-      till: 0.0, // 0-1, 100%left-100%right
-      taught: 0.05, //0-1, 0:full slack-1:no slack
-      sailOrientation: new THREE.Vector2(1, 0),
+      rotation: 0.0,
+      boomRotation: 0.0,
+      position: new THREE.Vector2(),
+      boomOrientation: new THREE.Vector2(1, 0),
+      mass: 100.0,
+      tillerMass: 5.0,
     },
     wind: {
-      speed: new THREE.Vector2(0, 0),
+      velocity: new THREE.Vector2(0, 0),
+    },
+    sea: {
+      velocity: new THREE.Vector2(0, 0),
     }
   };
 
