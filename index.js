@@ -29,11 +29,11 @@ import MainLevel from "./levels/main.js";
       mass: 100.0,
       tillerMass: 5.0,
     },
-    wind: {
-      velocity: new THREE.Vector2(0, 0),
-    },
-    sea: {
-      velocity: new THREE.Vector2(0, 0),
+    world: {
+      
+      windVelocity: new THREE.Vector2(0, 0),
+      seaVelocity: new THREE.Vector2(0, 0),
+      
     }
   };
 

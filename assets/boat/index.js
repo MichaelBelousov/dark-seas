@@ -28,7 +28,7 @@ let resources = {
 const rotateVecZ = (vec, theta) => {
   const cos = Math.cos(theta), sin = Math.sin(theta);
   const { x, y, z } = vec;
-  return THREE.Vector3(x*cos - y*sin, x*sin + y*cos, z);
+  return new THREE.Vector3(x*cos - y*sin, x*sin + y*cos, z);
 };
 
 // smoothly cap a curve with a maximum upper bound
@@ -46,7 +46,9 @@ const smoothClampCurve = (value, max) => {
 
 const incidentVec = (vec, norm) => {
   return 2 * (norm.dot(vec)).multiply(norm) + vec;
-};
+}; //I'm not sure what the objective of this is, but 'norm.dot(vec)' returns a float.
+// therefore you cannot multiply it using the .multiply function of the Vector3 class
+// it is trying to find the .multiply function of float. I could fix if I knew the purpose of this.
 
 // basic actor setup
 class Boat {
