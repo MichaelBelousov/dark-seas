@@ -16,3 +16,6 @@ npm-lock.json
 
 # krita
 *.kra~
+
+# mac
+.DS_Store
