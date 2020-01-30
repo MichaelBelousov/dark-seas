@@ -3,6 +3,7 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
 import Player from "../assets/player/index.js";
+import { drawArrow, incidentVec } from "../util.js";
 
 export class MainLevel {
 
@@ -28,8 +29,8 @@ export class MainLevel {
     // XXX: uses a partial context just for this object that
     // we know will work
     this.water = new Water(ctx);
-    this.boat = new Boat(ctx);
-    this.player = new Player(ctx);
+    //this.boat = new Boat(ctx);
+    //this.player = new Player(ctx);
     
 
     // lighting
@@ -47,6 +48,14 @@ export class MainLevel {
     spot1.shadow.camera.far = 1500;
     spot1.shadow.camera.fov = 40;
     spot1.shadow.bias = -0.005;
+
+    // test incidentVec
+    const arrow = new THREE.Vector3(2, 2, 0);
+    this.scene.add(drawArrow({ arrow }));
+    const planeNorm = new THREE.Vector3(-0.2, 1, 0).normalize();
+    this.scene.add(drawArrow({ arrow: planeNorm, color: "#ff0" }));
+    const reflected = incidentVec(arrow, planeNorm);
+    this.scene.add(drawArrow({ arrow: reflected, color: "#0ff" }));
   }
 
   spawn(Type) {
@@ -55,8 +64,8 @@ export class MainLevel {
 
   tick(ctx, delta) {
     this.water.tick(ctx, delta);
-    this.boat.tick(ctx, delta);
-    this.player.tick(ctx, delta);
+    //this.boat.tick(ctx, delta);
+    //this.player.tick(ctx, delta);
   }
 };
 

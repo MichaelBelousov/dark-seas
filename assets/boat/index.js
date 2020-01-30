@@ -2,6 +2,12 @@
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/DRACOLoader.js";
+import {
+  drawArrow,
+  rotateVecZ,
+  smoothClampCurve,
+  incidentVec
+} from "../../util.js";
 
 
 const resolve = path => './assets/boat/' + path;
@@ -23,32 +29,6 @@ let resources = {
   }
 };
 
-// TODO: move to math util module
-
-const rotateVecZ = (vec, theta) => {
-  const cos = Math.cos(theta), sin = Math.sin(theta);
-  const { x, y, z } = vec;
-  return new THREE.Vector3(x*cos - y*sin, x*sin + y*cos, z);
-};
-
-// smoothly cap a curve with a maximum upper bound
-const smoothClampCurve = (value, max) => {
-  //not sure why 4 seems to give it a linear proportion, should do the math, maybe it's close to
-  //a multiple of E
-  const func = (x, m) => m - m/(Math.E ** ((4/m) * x));
-  if (value instanceof THREE.Vector3) {
-    const { x, y, z } = value;
-    if (!(max instanceof THREE.Vector3)) max = new THREE.Vector3(max, max, max);
-    return Three.Vector3(func(x, max.x), func(y, max.y), func(z, max.z));
-  }
-  return func(value, max);
-};
-
-const incidentVec = (vec, norm) => {
-  return 2 * (norm.dot(vec)).multiply(norm) + vec;
-}; //I'm not sure what the objective of this is, but 'norm.dot(vec)' returns a float.
-// therefore you cannot multiply it using the .multiply function of the Vector3 class
-// it is trying to find the .multiply function of float. I could fix if I knew the purpose of this.
 
 // basic actor setup
 class Boat {
