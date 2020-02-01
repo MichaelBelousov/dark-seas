@@ -28,19 +28,19 @@ class Player {
 
   tick(ctx, delta = 0) {
     const tillerMaxTurnPerSec = 2.0; // takes 0.5 sec to turn tiller 100%
-    const { tillerFromLeftPercent } = ctx.state.boat.controls;
+    const { tillerFromLeftPercent } = ctx.state.input;
     if (this.keys['a']) {
-      ctx.state.boat.controls.tillerFromLeftPercent =
+      ctx.state.input.tillerFromLeftPercent =
         clamp(tillerFromLeftPercent - tillerMaxTurnPerSec * delta, 0, 1); 
     }
     if (this.keys['d']) {
-      ctx.state.boat.controls.tillerFromLeftPercent =
+      ctx.state.input.tillerFromLeftPercent =
         clamp(tillerFromLeftPercent + tillerMaxTurnPerSec * delta, 0, 1); 
     }
     const corner = new THREE.Vector2(0, 0);
     const center = new THREE.Vector2(window.clientX/2, window.clientY/2);
     const maxDist = corner.distanceTo(center);
-    ctx.state.boat.controls.mainshaftTautPercent = this.mouseLoc.distanceTo(center) / maxDist;
+    ctx.state.input.mainshaftTautPercent = this.mouseLoc.distanceTo(center) / maxDist;
   }
 };
 

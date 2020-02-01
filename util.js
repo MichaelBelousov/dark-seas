@@ -1,22 +1,31 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 
-/** @type {Record<string, THREE.ArrowHelper>} */
-const liveArrows = {};
+const memoizedHashes = {};
 
 /** 
  * Get a unique color hex string (#rrggbb) from a string
  * @param {string} key - hash input
  */
 const colorHash = (key) => {
-  const num = Array.from(key).reduce(
-    (prev, cur, i) => prev - 4529*cur.chatCodeAt(0) << i*719,
-    0
-  );
-  const capped = num % 256**3;
-  console.log(capped);
-  return `#{capped.toString(16).padStart(6, "0"}`;
+  if (key in memoizedHashes) {
+    return memoizedHashes[key];
+  }
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    const chr = key.charCodeAt(i);
+    hash = ((hash << 3) - hash * 41) + chr;
+    hash &= hash;
+  }
+  hash = Math.abs(hash % 256**3);
+  const result = `#${hash.toString(16).padStart(6, "0")}`;
+  memoizedHashes[key] = result;
+  return result;
 };
+
+
+/** @type {Record<string, THREE.ArrowHelper>} */
+const liveArrows = {};
 
 /**
  * Draw a debug arrow from `from` to `to` or draw arrow
@@ -35,6 +44,8 @@ export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
   from = from ?? new THREE.Vector3();
   color = color ?? (handle ? colorHash(handle) : "#ff0000");
   if (to) arrow = to.clone().sub(from); 
+  if (arrow instanceof THREE.Vector2) arrow = new THREE.Vector3(...arrow, 0);
+  if (from instanceof THREE.Vector2) from = new THREE.Vector3(...arrow, 0);
   let length = arrow.length();
   let dir = arrow.clone().normalize();
 
@@ -47,7 +58,7 @@ export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
   } else {
     result = new THREE.ArrowHelper(dir, from, length, color);
     if (handle) liveArrows[handle] = result;
-    scene.add(result);
+    if (scene) scene.add(result);
   }
   return result;
 };
@@ -83,6 +94,7 @@ export const smoothClampCurve = (value, max) => {
  * @param {THREE.Vector3} norm
  */
 export const reflectedVec = (vec, norm) => {
+  // turns out at least THREE.Vector3 already has this as a method
   return (
     norm.clone().multiplyScalar(2 * norm.dot(vec)
     ).sub(vec).normalize(

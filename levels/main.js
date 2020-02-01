@@ -3,7 +3,6 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
 import Player from "../assets/player/index.js";
-import { drawArrow, reflectedVec, rotateVecZ } from "../util.js";
 
 export class MainLevel {
 

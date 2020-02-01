@@ -9,6 +9,22 @@ import {
   reflectedVec
 } from "../../util.js";
 
+const ogDrawArrow = drawArrow;
+
+// TODO: move to monkeypatch module
+// HACK: add magic iteratability to THREE.Vectors
+THREE.Vector3.prototype[Symbol.iterator] = function* iterVec3 (v) {
+  if (!v) v = this;
+  yield v.x;
+  yield v.y;
+  yield v.z;
+}
+
+THREE.Vector2.prototype[Symbol.iterator] = function* iterVec2 (v) {
+  if (!v) v = this;
+  yield v.x;
+  yield v.y;
+}
 
 const resolve = path => './assets/boat/' + path;
 
@@ -72,10 +88,45 @@ class Boat {
   }
 
   drawPhysicsState(ctx, delta) {
+    const { state } = ctx;
+    //const drawArrow = (opts) =>
+      //ogDrawArrow({ ...opts, scene: ctx.scene });
+    drawArrow({
+      arrow: state.boat.orientation,
+      handle: "boatDir",
+      scene: ctx.scene,
+      color: "#ff0000"
+    });
+    drawArrow({
+      arrow: state.boat.boom.orientation,
+      handle: "boomDir",
+      scene: ctx.scene,
+      color: "#ffff00"
+    });
+    drawArrow({
+      arrow: state.boat.tiller.orientation,
+      handle: "tiller",
+      scene: ctx.scene,
+      color: "#0000ff"
+    });
+    drawArrow({
+      arrow: state.wind.velocity,
+      handle: "wind",
+      scene: ctx.scene,
+    });
+    drawArrow({
+      arrow: state.sea.velocity,
+      handle: "sea",
+      scene: ctx.scene,
+    });
   }
 
   tickPhysics(ctx, delta) {
     this.drawPhysicsState(ctx, delta);
+
+    if (!this.root) return;
+
+    ctx.state.boat.position = this.root.position;
 
     const {
       wind: { velocity: windV },
@@ -87,7 +138,10 @@ class Boat {
         },
         position,
         velocity,
-        mass
+        mass: boatMass,
+        tiller: {
+          mass: tillerMass
+        },
       },
       input: {
         tillerFromLeftPercent: tillerInput,
@@ -95,37 +149,55 @@ class Boat {
     } = ctx.state;
 
     // XXX: boomDir must be normalized
-    const boomNorm = rotateVecZ(boomDir, Math.PI/4);
+    const boomNorm = rotateVecZ(boomDir, Math.PI/2);
 
-    const windPush = -reflectedVec(windV, boomNorm);
+    const windPush = reflectedVec(windV, boomNorm).negate();
 
-    const tillerMinAngle = -Math.PI/3;
-    const tillerMaxAngle = Math.PI/3;
-    const tillerMin = rotateVecZ(boatDir.multiplyScalar(-1), tillerMinAngle);
-    const tillerMax = rotateVecZ(boatDir.multiplyScalar(-1), tillerMaxAngle);
-    const tillerDir = tillerMin.multiplyScalar(tillerInput) + tillerMax.multiplyScalar();
-    const tillerNorm = rotateVecZ(tillerMin.multiplyScalar(tillerInput) + tillerMax.multiplyScalar());
+    const tillerMaxTurnAngle = Math.PI/3;
+    const negBoatDir = boatDir.clone().negate();
 
-    const waterRelativeVelocity = seaV - velocity;
+    const tillerDir = rotateVecZ(
+      boatDir,
+      (tillerInput - 0.5) * tillerMaxTurnAngle
+    ).negate();
+    drawArrow({
+      arrow: tillerDir,
+      handle: "tillerDir",
+      scene: ctx.scene,
+    });
+    const isTillerLeft = tillerInput < 0.5;
+    const tillerNorm = isTillerLeft
+      ? rotateVecZ(tillerDir, Math.PI/2)
+      : rotateVecZ(tillerDir, -Math.PI/2);
+
+    const waterRelativeVelocity = seaV.clone().sub(velocity);
 
     // TODO: need to reflect normal?
     const tillerPush = reflectedVec(waterRelativeVelocity, tillerNorm);
 
-    const boatMassProportion = 0.9;
-    const boatMass = boatMassProportion * mass;
-    const tillerMass = (1 - boatMassProportion) * mass;
-
-    const acceleration = windPush/boatMass + tillerPush/tillerMass;
+    const acceleration = (
+      windPush.clone().divideScalar(boatMass)
+      .add(tillerPush.divideScalar(tillerMass))
+    );
 
     // simulate drag with smoothing and clamping
-    const maxVelocity = 5;
-    const rawNextVelocity = velocity + acceleration * delta;
-    const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
+    const rawNextVelocity = (
+      velocity.clone().add(
+        acceleration.clone().multiplyScalar(delta)
+      )
+    );
+    rawNextVelocity.clampLength(-5, 5);
+    //const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
+    ctx.state.boat.velocity.set(...rawNextVelocity);
 
-    ctx.state.boat.velocity = smoothedNextVelocity;
-    const newPosition = position + smoothedNextVelocity * delta;
+    const newPosition = (
+      position.clone().add(
+        new THREE.Vector3(...rawNextVelocity, 0).multiplyScalar(delta)
+      )
+    );
 
-    this.root.position = newPosition;
+    const { x, y } = newPosition;
+    this.root.position.set(x, y, 0);
   } 
 
   tick(ctx, delta = 0) {
