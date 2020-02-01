@@ -71,19 +71,28 @@ class Boat {
     };
   }
 
+  drawPhysicsState(ctx, delta) {
+  }
+
   tickPhysics(ctx, delta) {
+    this.drawPhysicsState(ctx, delta);
+
     const {
       wind: { velocity: windV },
-      sea: { velocity: seaV }
+      sea: { velocity: seaV },
+      boat: {
+        orientation: boatDir,
+        boom: {
+          orientation: boomDir,
+        },
+        position,
+        velocity,
+        mass
+      },
+      input: {
+        tillerFromLeftPercent: tillerInput,
+      }
     } = ctx.state;
-    const {
-      boatOrientation: boatDir,
-      tillerLevel,
-      boomOrientation: boomDir,
-      mass,
-      velocity,
-      position,
-    } = ctx.state.boat;
 
     // XXX: boomDir must be normalized
     const boomNorm = rotateVecZ(boomDir, Math.PI/4);
@@ -94,8 +103,8 @@ class Boat {
     const tillerMaxAngle = Math.PI/3;
     const tillerMin = rotateVecZ(boatDir.multiplyScalar(-1), tillerMinAngle);
     const tillerMax = rotateVecZ(boatDir.multiplyScalar(-1), tillerMaxAngle);
-    const tillerDir = tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar();
-    const tillerNorm = rotateVecZ(tillerMin.multiplyScalar(tillerLevel) + tillerMax.multiplyScalar());
+    const tillerDir = tillerMin.multiplyScalar(tillerInput) + tillerMax.multiplyScalar();
+    const tillerNorm = rotateVecZ(tillerMin.multiplyScalar(tillerInput) + tillerMax.multiplyScalar());
 
     const waterRelativeVelocity = seaV - velocity;
 

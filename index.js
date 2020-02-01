@@ -14,25 +14,37 @@ import MainLevel from "./levels/main.js";
 
   const clock = new THREE.Clock();
 
-  //Game State object to control variables
+  // Game State object to control variables
   const gameState = {
-    inputs: {
+    input: {
       tillerFromLeftPercent: 0.0, // 0-1, 100%left-100%right
-      mainshaftTautPercent: 0.5, //0-1, 0:full slack-1:no slack
+      mainshaftTautPercent: 0.5, // 0-1, 0:full slack-1:full taut
     },
     boat: {
       velocity: new THREE.Vector2(0, 1),
-      rotation: 0.0,
       position: new THREE.Vector2(),
       mass: 100.0,
+      rotation: 0.0,
+      get orientation() {
+        const origin = new THREE.Vector2();
+        return new THREE.Vector2(1, 0).rotateAround(origin, this.rotation);
+      },
       boom: {
         rotation: 0.0,
+        get orientation() {
+          const origin = new THREE.Vector2();
+          return new THREE.Vector2(1, 0).rotateAround(origin, this.rotation);
+        },
+        gripForce: 0.0,
       },
       tiller: {
         rotation: 0.0,
-        orientation: new THREE.Vector2(1, 0),
-        mass: 5.0,
-      }
+        get orientation() {
+          const origin = new THREE.Vector2();
+          return new THREE.Vector2(1, 0).rotateAround(origin, this.rotation);
+        },
+        mass: 5.0, // technically rutter mass...
+      },
     },
     wind: {
       velocity: new THREE.Vector2(0, 0),
