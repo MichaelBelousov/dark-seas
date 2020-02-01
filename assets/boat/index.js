@@ -104,12 +104,6 @@ class Boat {
       color: "#ffff00"
     });
     drawArrow({
-      arrow: state.boat.tiller.orientation,
-      handle: "tiller",
-      scene: ctx.scene,
-      color: "#0000ff"
-    });
-    drawArrow({
       arrow: state.wind.velocity,
       handle: "wind",
       scene: ctx.scene,
@@ -165,15 +159,28 @@ class Boat {
       handle: "tillerDir",
       scene: ctx.scene,
     });
-    const isTillerLeft = tillerInput < 0.5;
-    const tillerNorm = isTillerLeft
-      ? rotateVecZ(tillerDir, Math.PI/2)
-      : rotateVecZ(tillerDir, -Math.PI/2);
 
-    const waterRelativeVelocity = seaV.clone().sub(velocity);
+    //pick the normal that the sea velocity hits
+    const tillerNorm = rotateVecZ(tillerDir, Math.PI/2);
+    if (tillerNorm.dot(seaV) < 0)
+      tillerNorm.negate();
 
-    // TODO: need to reflect normal?
+    drawArrow({
+      arrow: tillerNorm,
+      handle: "tillerNorm",
+      scene: ctx.scene,
+    });
+
+    //const waterRelativeVelocity = velocity.clone().sub(seaV);
+    const waterRelativeVelocity = seaV;
+
     const tillerPush = reflectedVec(waterRelativeVelocity, tillerNorm);
+    drawArrow({
+      arrow: tillerPush,
+      handle: "tillerPush",
+      scene: ctx.scene,
+      color: '#ffffff',
+    });
 
     const acceleration = (
       windPush.clone().divideScalar(boatMass)

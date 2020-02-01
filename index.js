@@ -30,7 +30,7 @@ import MainLevel from "./levels/main.js";
         return new THREE.Vector2(1, 0).rotateAround(origin, this.rotation);
       },
       boom: {
-        rotation: 0.0,
+        rotation: Math.PI,
         get orientation() {
           const origin = new THREE.Vector2();
           return new THREE.Vector2(1, 0).rotateAround(origin, this.rotation);
@@ -47,10 +47,10 @@ import MainLevel from "./levels/main.js";
       },
     },
     wind: {
-      velocity: new THREE.Vector2(0, 0),
+      velocity: new THREE.Vector2(2, 0.2),
     },
     sea: {
-      velocity: new THREE.Vector2(0, 0),
+      velocity: new THREE.Vector2(0.2, 0.2),
     }
   };
 
