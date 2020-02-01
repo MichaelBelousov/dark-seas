@@ -73,9 +73,9 @@ class Boat {
 
   tickPhysics(ctx, delta) {
     const {
-      windVelocity: windV,
-      seaVelocity: seaV
-    } = ctx.state.world;
+      wind: { velocity: windV },
+      sea: { velocity: seaV }
+    } = ctx.state;
     const {
       boatOrientation: boatDir,
       tillerLevel,

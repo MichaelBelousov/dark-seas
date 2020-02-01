@@ -4,6 +4,20 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 /** @type {Record<string, THREE.ArrowHelper>} */
 const liveArrows = {};
 
+/** 
+ * Get a unique color hex string (#rrggbb) from a string
+ * @param {string} key - hash input
+ */
+const colorHash = (key) => {
+  const num = Array.from(key).reduce(
+    (prev, cur, i) => prev - 4529*cur.chatCodeAt(0) << i*719,
+    0
+  );
+  const capped = num % 256**3;
+  console.log(capped);
+  return `#{capped.toString(16).padStart(6, "0"}`;
+};
+
 /**
  * Draw a debug arrow from `from` to `to` or draw arrow
  * {arrow} optionally from `from`, reset an existing arrow
@@ -19,7 +33,7 @@ const liveArrows = {};
  */
 export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
   from = from ?? new THREE.Vector3();
-  color = color ?? "#ff0000";
+  color = color ?? (handle ? colorHash(handle) : "#ff0000");
   if (to) arrow = to.clone().sub(from); 
   let length = arrow.length();
   let dir = arrow.clone().normalize();
@@ -39,8 +53,14 @@ export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
 };
 
 export const rotateVecZ = (vec, theta) => {
-  const zAxis = new THREE.Vector3(0, 0, 1);
-  return vec.clone().applyAxisAngle(zAxis, theta);
+  if (vec instanceof THREE.Vector3) {
+    const zAxis = new THREE.Vector3(0, 0, 1);
+    return vec.clone().applyAxisAngle(zAxis, theta);
+  }
+  if (vec instanceof THREE.Vector2) {
+    const origin = new THREE.Vector2(0, 0);
+    return vec.clone().rotateAround(origin, theta);
+  }
 };
 
 // smoothly cap a curve with a maximum upper bound

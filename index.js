@@ -16,18 +16,23 @@ import MainLevel from "./levels/main.js";
 
   //Game State object to control variables
   const gameState = {
+    inputs: {
+      tillerFromLeftPercent: 0.0, // 0-1, 100%left-100%right
+      mainshaftTautPercent: 0.5, //0-1, 0:full slack-1:no slack
+    },
     boat: {
-      controls: {
-        tillerFromLeftPercent: 0.0, // 0-1, 100%left-100%right
-        mainshaftTautPercent: 0.5, //0-1, 0:full slack-1:no slack
-      },
       velocity: new THREE.Vector2(0, 1),
       rotation: 0.0,
-      boomRotation: 0.0,
       position: new THREE.Vector2(),
-      boomOrientation: new THREE.Vector2(1, 0),
       mass: 100.0,
-      tillerMass: 5.0,
+      boom: {
+        rotation: 0.0,
+      },
+      tiller: {
+        rotation: 0.0,
+        orientation: new THREE.Vector2(1, 0),
+        mass: 5.0,
+      }
     },
     wind: {
       velocity: new THREE.Vector2(0, 0),

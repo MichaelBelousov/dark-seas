@@ -28,8 +28,8 @@ export class MainLevel {
     // XXX: uses a partial context just for this object that
     // we know will work
     this.water = new Water(ctx);
-    //this.boat = new Boat(ctx);
-    //this.player = new Player(ctx);
+    this.boat = new Boat(ctx);
+    this.player = new Player(ctx);
     
 
     // lighting
@@ -57,31 +57,8 @@ export class MainLevel {
 
   tick(ctx, delta) {
     this.water.tick(ctx, delta);
-    const zAxis = new THREE.Vector3(0, 0, 1);
-
-
-    this.arrow.applyAxisAngle(zAxis, delta);
-    this.arrowObj = drawArrow({
-      arrow: this.arrow,
-      handle: "arrow",
-      scene: this.scene,
-    });
-
-    this.planeNorm = new THREE.Vector3(1, 0, 0).normalize();
-    this.planeNormObj = drawArrow({
-      arrow: this.planeNorm,
-      color: "#ff0",
-      handle: "planeNorm",
-      scene: this.scene,
-    });
-
-    this.reflected = reflectedVec(this.arrow, this.planeNorm);
-    this.reflectedObj = drawArrow({
-      arrow: this.reflected,
-      color: "#0ff",
-      handle: "reflected",
-      scene: this.scene,
-    });
+    this.boat.tick(ctx, delta);
+    this.player.tick(ctx, delta);
   }
 };
 
