@@ -1,29 +1,46 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 
+/** @type {Record<string, THREE.ArrowHelper>} */
+const liveArrows = {};
+
 /**
  * Draw a debug arrow from `from` to `to` or draw arrow
- * {arrow} optionally from `from`
+ * {arrow} optionally from `from`, reset an existing arrow
+ * to the parameters if {handle} is supplied.
  * @param {{
- *   from?: THREE.Vector3,
- *   to?: THREE.Vector3,
- *   arrow?: THREE.Vector3,
- *   color?: string
+ *   from?: THREE.Vector3;
+ *   to?: THREE.Vector3;
+ *   arrow?: THREE.Vector3;
+ *   color?: string;
+ *   handle?: string;
+ *   scene?: THREE.Scene;
  * }} namedArgs
  */
-export const drawArrow = ({ from, to, arrow, color }) => {
+export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
   from = from ?? new THREE.Vector3();
   color = color ?? "#ff0000";
   if (to) arrow = to.clone().sub(from); 
   let length = arrow.length();
   let dir = arrow.clone().normalize();
-  return new THREE.ArrowHelper(dir, from, length, color);
+
+  let result;
+  if (handle && handle in liveArrows) {
+    result = liveArrows[handle];
+    result.setDirection(dir);
+    result.setLength(length);
+    if (color) result.setColor(color);
+  } else {
+    result = new THREE.ArrowHelper(dir, from, length, color);
+    if (handle) liveArrows[handle] = result;
+    scene.add(result);
+  }
+  return result;
 };
 
 export const rotateVecZ = (vec, theta) => {
-  const cos = Math.cos(theta), sin = Math.sin(theta);
-  const { x, y, z } = vec;
-  return new THREE.Vector3(x*cos - y*sin, x*sin + y*cos, z);
+  const zAxis = new THREE.Vector3(0, 0, 1);
+  return vec.clone().applyAxisAngle(zAxis, theta);
 };
 
 // smoothly cap a curve with a maximum upper bound
@@ -40,20 +57,16 @@ export const smoothClampCurve = (value, max) => {
 };
 
 /**
- * Get the incident (reflected) vector of `vec` to a
- * surface defined by a normal vector `norm` (preserves length)
+ * Get the (length-preserving) reflected vector of `vec` to a
+ * surface defined by a normal vector `norm` (must be normalized)
  * @param {THREE.Vector3} vec
  * @param {THREE.Vector3} norm
  */
-export const incidentVec = (vec, norm) => {
-  norm = norm.clone();
-  return norm.multiply(
-    norm.clone().multiplyScalar(
-      2 * norm.dot(vec)
-    )
-  ).sub(
-    vec
-  ).normalize(
-  ).multiplyScalar(vec.length());
+export const reflectedVec = (vec, norm) => {
+  return (
+    norm.clone().multiplyScalar(2 * norm.dot(vec)
+    ).sub(vec).normalize(
+    ).multiplyScalar(vec.length())
+  );
 };
 

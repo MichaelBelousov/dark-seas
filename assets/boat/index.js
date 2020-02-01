@@ -6,7 +6,7 @@ import {
   drawArrow,
   rotateVecZ,
   smoothClampCurve,
-  incidentVec
+  reflectedVec
 } from "../../util.js";
 
 
@@ -88,7 +88,7 @@ class Boat {
     // XXX: boomDir must be normalized
     const boomNorm = rotateVecZ(boomDir, Math.PI/4);
 
-    const windPush = -incidentVec(windV, boomNorm);
+    const windPush = -reflectedVec(windV, boomNorm);
 
     const tillerMinAngle = -Math.PI/3;
     const tillerMaxAngle = Math.PI/3;
@@ -100,7 +100,7 @@ class Boat {
     const waterRelativeVelocity = seaV - velocity;
 
     // TODO: need to reflect normal?
-    const tillerPush = incidentVec(waterRelativeVelocity, tillerNorm);
+    const tillerPush = reflectedVec(waterRelativeVelocity, tillerNorm);
 
     const boatMassProportion = 0.9;
     const boatMass = boatMassProportion * mass;

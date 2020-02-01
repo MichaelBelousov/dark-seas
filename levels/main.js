@@ -3,7 +3,7 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
 import Player from "../assets/player/index.js";
-import { drawArrow, incidentVec } from "../util.js";
+import { drawArrow, reflectedVec, rotateVecZ } from "../util.js";
 
 export class MainLevel {
 
@@ -15,7 +15,6 @@ export class MainLevel {
 
   constructor (ctx) {
     this.scene = ctx.scene = new THREE.Scene();
-
     this.camera = ctx.camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -49,13 +48,7 @@ export class MainLevel {
     spot1.shadow.camera.fov = 40;
     spot1.shadow.bias = -0.005;
 
-    // test incidentVec
-    const arrow = new THREE.Vector3(2, 2, 0);
-    this.scene.add(drawArrow({ arrow }));
-    const planeNorm = new THREE.Vector3(-0.2, 1, 0).normalize();
-    this.scene.add(drawArrow({ arrow: planeNorm, color: "#ff0" }));
-    const reflected = incidentVec(arrow, planeNorm);
-    this.scene.add(drawArrow({ arrow: reflected, color: "#0ff" }));
+    this.arrow = new THREE.Vector3(2, 2, 0);
   }
 
   spawn(Type) {
@@ -64,8 +57,31 @@ export class MainLevel {
 
   tick(ctx, delta) {
     this.water.tick(ctx, delta);
-    //this.boat.tick(ctx, delta);
-    //this.player.tick(ctx, delta);
+    const zAxis = new THREE.Vector3(0, 0, 1);
+
+
+    this.arrow.applyAxisAngle(zAxis, delta);
+    this.arrowObj = drawArrow({
+      arrow: this.arrow,
+      handle: "arrow",
+      scene: this.scene,
+    });
+
+    this.planeNorm = new THREE.Vector3(1, 0, 0).normalize();
+    this.planeNormObj = drawArrow({
+      arrow: this.planeNorm,
+      color: "#ff0",
+      handle: "planeNorm",
+      scene: this.scene,
+    });
+
+    this.reflected = reflectedVec(this.arrow, this.planeNorm);
+    this.reflectedObj = drawArrow({
+      arrow: this.reflected,
+      color: "#0ff",
+      handle: "reflected",
+      scene: this.scene,
+    });
   }
 };
 
