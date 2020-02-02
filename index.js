@@ -21,9 +21,9 @@ import MainLevel from "./levels/main.js";
       mainshaftTautPercent: 0.5, // 0-1, 0:full slack-1:full taut
     },
     boat: {
-      velocity: new THREE.Vector2(0, 1),
+      velocity: new THREE.Vector2(0, 0),
       position: new THREE.Vector2(),
-      mass: 100.0,
+      mass: 20.0,
       rotation: 0.0,
       get orientation() {
         const origin = new THREE.Vector2();

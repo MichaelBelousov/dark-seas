@@ -54,6 +54,7 @@ export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
     result = liveArrows[handle];
     result.setDirection(dir);
     result.setLength(length);
+    result.position.set(...from);
     if (color) result.setColor(color);
   } else {
     result = new THREE.ArrowHelper(dir, from, length, color);

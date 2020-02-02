@@ -9,8 +9,6 @@ import {
   reflectedVec
 } from "../../util.js";
 
-const ogDrawArrow = drawArrow;
-
 // TODO: move to monkeypatch module
 // HACK: add magic iteratability to THREE.Vectors
 THREE.Vector3.prototype[Symbol.iterator] = function* iterVec3 (v) {
@@ -67,9 +65,10 @@ class Boat {
 
     const result = gltfLoader.load(resources.model.path,
       gltf => {
-        this.root = gltf.scene;
-        ctx.scene.add(this.root);
-        this.root.scale.multiplyScalar(0.2);
+        //this.root = gltf.scene;
+        //ctx.scene.add(this.root);
+        //this.root.scale.multiplyScalar(0.2);
+        this.root = { position: new THREE.Vector3() }
       },
       console.log,
       err => {
@@ -89,29 +88,38 @@ class Boat {
 
   drawPhysicsState(ctx, delta) {
     const { state } = ctx;
-    //const drawArrow = (opts) =>
-      //ogDrawArrow({ ...opts, scene: ctx.scene });
     drawArrow({
+      from: state.boat.position,
       arrow: state.boat.orientation,
       handle: "boatDir",
       scene: ctx.scene,
       color: "#ff0000"
     });
     drawArrow({
+      from: state.boat.position,
       arrow: state.boat.boom.orientation,
       handle: "boomDir",
       scene: ctx.scene,
       color: "#ffff00"
     });
     drawArrow({
+      from: state.boat.position,
       arrow: state.wind.velocity,
       handle: "wind",
       scene: ctx.scene,
     });
     drawArrow({
+      from: state.boat.position,
       arrow: state.sea.velocity,
       handle: "sea",
       scene: ctx.scene,
+    });
+    drawArrow({
+      from: state.boat.position,
+      arrow: state.boat.velocity,
+      handle: "boatVelocity",
+      scene: ctx.scene,
+      color: '#0000ff',
     });
   }
 
@@ -144,8 +152,22 @@ class Boat {
 
     // XXX: boomDir must be normalized
     const boomNorm = rotateVecZ(boomDir, Math.PI/2);
+    drawArrow({
+      from: position,
+      arrow: boomNorm,
+      handle: "boomNorm",
+      scene: ctx.scene,
+      color: "#ff00af"
+    });
 
     const windPush = reflectedVec(windV, boomNorm).negate();
+    drawArrow({
+      from: position,
+      arrow: windPush,
+      handle: "windPush",
+      scene: ctx.scene,
+      color: "#ff00ff"
+    });
 
     const tillerMaxTurnAngle = Math.PI/3;
     const negBoatDir = boatDir.clone().negate();
@@ -155,6 +177,7 @@ class Boat {
       (tillerInput - 0.5) * tillerMaxTurnAngle
     ).negate();
     drawArrow({
+      from: position,
       arrow: tillerDir,
       handle: "tillerDir",
       scene: ctx.scene,
@@ -166,16 +189,31 @@ class Boat {
       tillerNorm.negate();
 
     drawArrow({
+      from: position,
       arrow: tillerNorm,
       handle: "tillerNorm",
       scene: ctx.scene,
     });
 
-    //const waterRelativeVelocity = velocity.clone().sub(seaV);
-    const waterRelativeVelocity = seaV;
-
-    const tillerPush = reflectedVec(waterRelativeVelocity, tillerNorm);
+    // velocity of the water relative to the boat
+    const waterRelativeV = seaV.clone().sub(velocity);
     drawArrow({
+      from: position,
+      arrow: waterRelativeV,
+      handle: "waterRelativeV",
+      scene: ctx.scene,
+    });
+
+    // as the boat moves through water, the rutter is "hit" by
+    // water which imposes a force, we use the dot product to
+    // determine the "surface area" of the rutter which multiplies
+    // the force
+    // we take the absolute value of the dot product since the
+    // force direction doesn't invert when the side of the rutter does
+    const tillerArea = Math.abs(waterRelativeV.dot(tillerNorm));
+    const tillerPush = waterRelativeV.clone().setLength(tillerArea);
+    drawArrow({
+      from: position,
       arrow: tillerPush,
       handle: "tillerPush",
       scene: ctx.scene,
@@ -194,6 +232,7 @@ class Boat {
       )
     );
     rawNextVelocity.clampLength(-5, 5);
+
     //const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
     ctx.state.boat.velocity.set(...rawNextVelocity);
 
@@ -204,6 +243,7 @@ class Boat {
     );
 
     const { x, y } = newPosition;
+
     this.root.position.set(x, y, 0);
   } 
 
