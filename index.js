@@ -12,6 +12,8 @@ import MainLevel from "./levels/main.js";
   document.body.appendChild(renderer.domElement);
   renderer.autoClear = false;
 
+
+  
   const clock = new THREE.Clock();
 
   // Game State object to control variables
@@ -53,6 +55,8 @@ import MainLevel from "./levels/main.js";
       velocity: new THREE.Vector2(0.2, 0.2),
     }
   };
+
+Window.addEventListener
 
 
   const textureLoader = new THREE.TextureLoader();
