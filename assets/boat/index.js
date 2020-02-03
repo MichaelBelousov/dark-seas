@@ -9,6 +9,11 @@ import {
   reflectedVec
 } from "../../util.js";
 
+const V3 = THREE.Vector3;
+const V2 = THREE.Vector2;
+
+const deltaFac = 1;
+
 // TODO: move to monkeypatch module
 // HACK: add magic iteratability to THREE.Vectors
 THREE.Vector3.prototype[Symbol.iterator] = function* iterVec3 (v) {
@@ -23,6 +28,14 @@ THREE.Vector2.prototype[Symbol.iterator] = function* iterVec2 (v) {
   yield v.x;
   yield v.y;
 }
+
+Object.defineProperty(THREE.Vector3.prototype, "im", {
+  get () { return this.clone(); }
+});
+
+Object.defineProperty(THREE.Vector2.prototype, "im", {
+  get () { return this.clone(); }
+});
 
 const resolve = path => './assets/boat/' + path;
 
@@ -68,7 +81,7 @@ class Boat {
         //this.root = gltf.scene;
         //ctx.scene.add(this.root);
         //this.root.scale.multiplyScalar(0.2);
-        this.root = { position: new THREE.Vector3() }
+        this.root = { position: new V3() }
       },
       console.log,
       err => {
@@ -77,12 +90,12 @@ class Boat {
     );
     this.uniforms = {
       time: { value: 0 },
-      lightPos: { value: new THREE.Vector2(0.0, 0.0) },
+      lightPos: { value: new V2(0.0, 0.0) },
       lightIntensity: { value: 2.0 },
       lightRadius: { value: 0.6 },
       fogDensity: { value: 0.2 },
-      fogColor: { value: new THREE.Vector3(0, 0, 0) },
-      uvScale: { value: new THREE.Vector2(1.0, 1.0) },
+      fogColor: { value: new V3(0, 0, 0) },
+      uvScale: { value: new V2(1.0, 1.0) },
     };
   }
 
@@ -140,34 +153,13 @@ class Boat {
         },
         position,
         velocity,
-        mass: boatMass,
-        tiller: {
-          mass: tillerMass
-        },
+        rutter,
+        ...boat
       },
       input: {
         tillerFromLeftPercent: tillerInput,
       }
     } = ctx.state;
-
-    // XXX: boomDir must be normalized
-    const boomNorm = rotateVecZ(boomDir, Math.PI/2);
-    drawArrow({
-      from: position,
-      arrow: boomNorm,
-      handle: "boomNorm",
-      scene: ctx.scene,
-      color: "#ff00af"
-    });
-
-    const windPush = reflectedVec(windV, boomNorm).negate();
-    drawArrow({
-      from: position,
-      arrow: windPush,
-      handle: "windPush",
-      scene: ctx.scene,
-      color: "#ff00ff"
-    });
 
     const tillerMaxTurnAngle = Math.PI/3;
     const negBoatDir = boatDir.clone().negate();
@@ -210,41 +202,80 @@ class Boat {
     // the force
     // we take the absolute value of the dot product since the
     // force direction doesn't invert when the side of the rutter does
-    const tillerArea = Math.abs(waterRelativeV.dot(tillerNorm));
-    const tillerPush = waterRelativeV.clone().setLength(tillerArea);
+    const rutterArea = Math.abs(waterRelativeV.dot(tillerNorm));
+
+    const rutterPush = waterRelativeV.clone().setLength(rutterArea);
     drawArrow({
       from: position,
-      arrow: tillerPush,
-      handle: "tillerPush",
+      arrow: rutterPush,
+      handle: "rutterPush",
       scene: ctx.scene,
       color: '#ffffff',
     });
 
-    const acceleration = (
-      windPush.clone().divideScalar(boatMass)
-      .add(tillerPush.divideScalar(tillerMass))
+    const rutterDistanceFromBoatCenterOfMass = 3; //meters
+
+    // using solid cylinder moment of inertia
+    const boatInertiaMoment = (
+      (boat.mass*boat.hull.depth**2)/4
+      + (boat.mass*boat.hull.length**2)/12
     );
 
-    // simulate drag with smoothing and clamping
+    const boatRutterRadius =
+      boatDir.clone().negate().setLength(boat.hull.length/2);
+
+    const rutterTorque = (
+      new V3(...boatRutterRadius, 0).cross(new V3(...rutterPush, 0))
+    );
+
+    // rutterTorque is netTorque
+    const angularAcceleration = rutterTorque.divideScalar(boatInertiaMoment);
+
+    // TODO: need to use proper angular velocity perhaps
+    boat.rotation += angularAcceleration.length() * delta * deltaFac;
+
+    const boomNorm = rotateVecZ(boomDir, Math.PI/2);
+    drawArrow({
+      from: position,
+      arrow: boomNorm,
+      handle: "boomNorm",
+      scene: ctx.scene,
+      color: "#ff00af"
+    });
+
+    const windPush = reflectedVec(windV, boomNorm).negate();
+    drawArrow({
+      from: position,
+      arrow: windPush,
+      handle: "windPush",
+      scene: ctx.scene,
+      color: "#ff00ff"
+    });
+    // TODO: use a dot product factor on the force on the boat
+    // to simulate the push area of the keel
+
+    const linearAcceleration = windPush.im.divideScalar(boat.mass);
+
+    // simulate drag with smoothing or clamping or force?
+    let dragForce;
+
     const rawNextVelocity = (
       velocity.clone().add(
-        acceleration.clone().multiplyScalar(delta)
+        linearAcceleration.clone().multiplyScalar(delta*deltaFac)
       )
-    );
-    rawNextVelocity.clampLength(-5, 5);
+    ).clampLength(-5, 5);
 
     //const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
     ctx.state.boat.velocity.set(...rawNextVelocity);
 
     const newPosition = (
       position.clone().add(
-        new THREE.Vector3(...rawNextVelocity, 0).multiplyScalar(delta)
+        new V3(...rawNextVelocity, 0)
+          .multiplyScalar(delta*deltaFac)
       )
     );
 
-    const { x, y } = newPosition;
-
-    this.root.position.set(x, y, 0);
+    this.root.position.set(...newPosition, 0);
   } 
 
   tick(ctx, delta = 0) {

@@ -22,6 +22,7 @@ import MainLevel from "./levels/main.js";
     },
     boat: {
       velocity: new THREE.Vector2(0, 0),
+      angularVelocity: new THREE.Vector3(),
       position: new THREE.Vector2(),
       mass: 20.0,
       rotation: 0.0,
@@ -37,14 +38,19 @@ import MainLevel from "./levels/main.js";
         },
         gripForce: 0.0,
       },
-      tiller: {
+      rutter: {
         rotation: 0.0,
         get orientation() {
           const origin = new THREE.Vector2();
           return new THREE.Vector2(1, 0).rotateAround(origin, this.rotation);
         },
-        mass: 5.0, // technically rutter mass...
+        mass: 5.0, //kg
+        length: 1, //m
       },
+      hull: {
+        depth: 1, //m
+        length: 4, //m
+      }
     },
     wind: {
       velocity: new THREE.Vector2(2, 0.2),
