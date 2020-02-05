@@ -2,6 +2,7 @@
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/DRACOLoader.js";
+import { Bodies } from "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 import {
   drawArrow,
   rotateVecZ,
@@ -15,7 +16,7 @@ const V2 = THREE.Vector2;
 const deltaFac = 1;
 
 // TODO: move to monkeypatch module
-// HACK: add magic iteratability to THREE.Vectors
+// HACK: add magic iterability to THREE.Vectors
 THREE.Vector3.prototype[Symbol.iterator] = function* iterVec3 (v) {
   if (!v) v = this;
   yield v.x;
@@ -97,6 +98,8 @@ class Boat {
       fogColor: { value: new V3(0, 0, 0) },
       uvScale: { value: new V2(1.0, 1.0) },
     };
+
+    this.physicsBodies = Bodies.rectangle(200, 200, 30, 70);
   }
 
   drawPhysicsState(ctx, delta) {

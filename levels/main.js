@@ -3,6 +3,7 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
 import Player from "../assets/player/index.js";
+import { Engine, World } from "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 
 export class MainLevel {
 
@@ -13,6 +14,7 @@ export class MainLevel {
   }
 
   constructor (ctx) {
+    this.physicsWorld = ctx.physicsWorld;
     this.scene = ctx.scene = new THREE.Scene();
     this.camera = ctx.camera = new THREE.PerspectiveCamera(
       75,
@@ -27,7 +29,7 @@ export class MainLevel {
     // XXX: uses a partial context just for this object that
     // we know will work
     this.water = new Water(ctx);
-    this.boat = new Boat(ctx);
+    this.boat = this.spawn(Boat, ctx);
     this.player = new Player(ctx);
     
 
@@ -50,11 +52,17 @@ export class MainLevel {
     this.arrow = new THREE.Vector3(2, 2, 0);
   }
 
-  spawn(Type) {
-    const instance = Type(scene);
+  spawn(Type, ctx) {
+    const instance = Type(ctx);
+    Matter.World.add(
+      this.physicsWorld,
+      [...instance.physicBodies]
+    );
+    return instance;
   }
 
   tick(ctx, delta) {
+    Matter.Engine.update(ctx.physicsEngine, delta);
     this.water.tick(ctx, delta);
     this.boat.tick(ctx, delta);
     this.player.tick(ctx, delta);
