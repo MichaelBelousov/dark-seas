@@ -10,7 +10,7 @@ import {
   reflectedVec
 } from "../../util.js";
 
-const { Bodies } = window.Matter;
+const { Bodies, Body, Constraint } = window.Matter;
 
 const V3 = THREE.Vector3;
 const V2 = THREE.Vector2;
@@ -101,11 +101,36 @@ class Boat {
       uvScale: { value: new V2(1.0, 1.0) },
     };
 
-    const hullBody = Bodies.rectangle(200, 200, 30, 70);
-    const tillerBody = Bodies.rectangle(200, 235, 2, 20);
+    this.hullBody = Bodies.rectangle(200, 200, 30, 70);
+    this.hullBody.collisionFilter.category = 0b001;
+    this.hullBody.collisionFilter.mask = 0b000;
+    this.rutterBody = Bodies.rectangle(200, 235, 2, 20);
+    this.rutterBody.collisionFilter.category = 0b010;
+    this.rutterBody.collisionFilter.mask = 0b000;
+    this.boomBody = Bodies.rectangle(215, 235, 2, 80);
+    this.rutterBody.collisionFilter.category = 0b100;
+    this.boomBody.collisionFilter.mask = 0b000;
+    this.hullRutterJoint = Constraint.create({
+      pointA: { x: 0, y: 35 },
+      pointB: { x: 0, y: 10 },
+      bodyA: this.hullBody,
+      bodyB: this.rutterBody,
+      stiffness: 0.5,
+      length: 0
+    }),
+    this.mastBoomJoint = Constraint.create({
+      pointB: { x: 0, y: 40 },
+      bodyA: this.hullBody,
+      bodyB: this.boomBody,
+      stiffness: 0.5,
+      length: 0
+    }),
     this.physicsBodies = [
-      hullBody,
-      tillerBody
+      this.hullBody,
+      this.rutterBody,
+      this.boomBody,
+      this.hullRutterJoint,
+      this.mastBoomJoint,
     ];
   }
 
@@ -236,6 +261,12 @@ class Boat {
 
     const rutterTorque = (
       new V3(...boatRutterRadius, 0).cross(new V3(...rutterPush, 0))
+    );
+
+    Body.applyForce(
+      this.rutterBody,
+      this.rutterBody.position,
+      rutterPush
     );
 
     // rutterTorque is netTorque
