@@ -8,6 +8,7 @@ import {
   smoothClampCurve,
   reflectedVec
 } from "../../util.js";
+import planck from "https://cdn.jsdelivr.net/npm/planck-js@0.2/dist/planck-with-testbed.js";
 
 const V3 = THREE.Vector3;
 const V2 = THREE.Vector2;
@@ -97,6 +98,15 @@ class Boat {
       fogColor: { value: new V3(0, 0, 0) },
       uvScale: { value: new V2(1.0, 1.0) },
     };
+  }
+
+  spawnPhysics(world) {
+    const boatBody = world.createBody({
+      type: 'dynamic',
+    });
+    const boatFixt = boatBody.createFixture({
+      shape: planck.Box(planck.Vec2(0,0), planck.Vec2(40, 40));
+    });
   }
 
   drawPhysicsState(ctx, delta) {

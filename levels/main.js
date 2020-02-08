@@ -13,6 +13,7 @@ export class MainLevel {
   }
 
   constructor (ctx) {
+    this.physicsWorld = ctx.physicsWorld;
     this.scene = ctx.scene = new THREE.Scene();
     this.camera = ctx.camera = new THREE.PerspectiveCamera(
       75,
@@ -51,7 +52,9 @@ export class MainLevel {
   }
 
   spawn(Type) {
-    const instance = Type(scene);
+    const instance = new Type(scene);
+    instance.spawnPhysics(world);
+    return instance;
   }
 
   tick(ctx, delta) {
