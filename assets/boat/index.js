@@ -1,16 +1,14 @@
 
-import "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.110.0/examples/jsm/loaders/DRACOLoader.js";
+import { Bodies } from "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 import {
   drawArrow,
   rotateVecZ,
   smoothClampCurve,
   reflectedVec
 } from "../../util.js";
-
-const { Bodies } = window.Matter;
 
 const V3 = THREE.Vector3;
 const V2 = THREE.Vector2;
@@ -101,12 +99,7 @@ class Boat {
       uvScale: { value: new V2(1.0, 1.0) },
     };
 
-    const hullBody = Bodies.rectangle(200, 200, 30, 70);
-    const tillerBody = Bodies.rectangle(200, 235, 2, 20);
-    this.physicsBodies = [
-      hullBody,
-      tillerBody
-    ];
+    this.physicsBodies = Bodies.rectangle(200, 200, 30, 70);
   }
 
   drawPhysicsState(ctx, delta) {

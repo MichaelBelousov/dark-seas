@@ -3,9 +3,7 @@ import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/thre
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
 import Player from "../assets/player/index.js";
-import "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
-
-const { Engine, World } = window.Matter;
+import { Engine, World } from "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 
 export class MainLevel {
 
@@ -55,10 +53,10 @@ export class MainLevel {
   }
 
   spawn(Type, ctx) {
-    const instance = new Type(ctx);
+    const instance = Type(ctx);
     Matter.World.add(
       this.physicsWorld,
-      instance.physicsBodies
+      [...instance.physicBodies]
     );
     return instance;
   }

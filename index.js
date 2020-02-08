@@ -1,43 +1,21 @@
 
-import "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
+//import THREE from "three.js";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import MainLevel from "./levels/main.js";
+import Matter from "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 
-// XXX: Matter import isn't working well and can't find docs, maybe it's UMD?
-const { Matter } = window;
 
 (async () => {
   await MainLevel.load();
 
   const physicsEngine = Matter.Engine.create();
   const physicsWorld = physicsEngine.world;
-  physicsWorld.gravity.scale = 0;
-  const renderer = Matter.Render.create({
-    element: document.body,
-    engine: physicsEngine,
-    options: {
-      width: 800,
-      height: 600,
-      showVelocity: true,
-      showAngleIndicator: true,
-    }
-  });
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  renderer.autoClear = false;
 
-  const mouse = Matter.Mouse.create(renderer.canvas);
-  const mouseConstraint = Matter.MouseConstraint.create(
-    physicsEngine,
-    {
-      mouse,
-      constraint: {
-        stiffness: 0.2,
-        render: { visible: true }
-      }
-    }
-  );
 
-  Matter.World.add(physicsWorld, mouseConstraint);
-  
-  renderer.mouse = mouse;
   
   const clock = new THREE.Clock();
 
@@ -116,6 +94,7 @@ Window.addEventListener
   window.addEventListener('resize', () => {
     ctx.camera.aspect = window.innerWidth / window.innerHeight;
     ctx.camera.updateProjectionMatrix();
+    ctx.renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
   const tickLogic = (delta) => {
@@ -136,11 +115,7 @@ Window.addEventListener
 
       requestAnimationFrame(tickGame); // causes async feedback loop
       tickLogic(delta);
-      Matter.Render.run(renderer);
-      Matter.Render.lookAt(renderer, {
-        min: { x: 0, y: 0 },
-        max: { x: 800, y: 800 }
-      });
+      renderer.render(ctx.scene, ctx.camera);
     };
     tickGame();
   };
