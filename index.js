@@ -2,14 +2,11 @@
 //import THREE from "three.js";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import MainLevel from "./levels/main.js";
-import Matter from "https://cdn.jsdelivr.net/npm/matter-js@0.14.2";
 
 
 (async () => {
   await MainLevel.load();
 
-  const physicsEngine = Matter.Engine.create();
-  const physicsWorld = physicsEngine.world;
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -78,8 +75,6 @@ Window.addEventListener
     camera: undefined,
     textureLoader,
     renderer,
-    physicsEngine,
-    physicsWorld,
   };
 
   const level = new MainLevel(partialContext);
