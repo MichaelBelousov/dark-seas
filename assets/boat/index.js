@@ -10,7 +10,7 @@ import {
   reflectedVec
 } from "../../util.js";
 
-const { Bodies, Body, Constraint } = window.Matter;
+const { Bodies, Body, Composite, Constraint } = window.Matter;
 
 const V3 = THREE.Vector3;
 const V2 = THREE.Vector2;
@@ -115,23 +115,23 @@ class Boat {
       pointB: { x: 0, y: 10 },
       bodyA: this.hullBody,
       bodyB: this.rutterBody,
-      stiffness: 0.5,
+      stiffness: 0,
       length: 0
-    }),
+    });
     this.mastBoomJoint = Constraint.create({
       pointB: { x: 0, y: 40 },
       bodyA: this.hullBody,
       bodyB: this.boomBody,
-      stiffness: 0.5,
+      stiffness: 0,
       length: 0
-    }),
-    this.physicsBodies = [
-      this.hullBody,
-      this.rutterBody,
-      this.boomBody,
-      this.hullRutterJoint,
-      this.mastBoomJoint,
-    ];
+    });
+    this.physicsBodies = [Composite.create()];
+    const [physicsBody] = this.physicsBodies;
+    Composite.add(physicsBody, this.hullBody);
+    Composite.add(physicsBody, this.rutterBody);
+    Composite.add(physicsBody, this.boomBody);
+    Composite.add(physicsBody, this.hullRutterJoint);
+    Composite.add(physicsBody, this.mastBoomJoint);
   }
 
   drawPhysicsState(ctx, delta) {
@@ -178,7 +178,7 @@ class Boat {
 
     ctx.state.boat.position = this.root.position;
 
-    const {
+    let {
       wind: { velocity: windV },
       sea: { velocity: seaV },
       boat: {
@@ -222,6 +222,7 @@ class Boat {
       scene: ctx.scene,
     });
 
+    velocity = this.hullBody.velocity;
     // velocity of the water relative to the boat
     const waterRelativeV = seaV.clone().sub(velocity);
     drawArrow({
@@ -263,17 +264,23 @@ class Boat {
       new V3(...boatRutterRadius, 0).cross(new V3(...rutterPush, 0))
     );
 
+    /*
+    Body.setAngularVelocity (
+      this.rutterBody,
+      rutterTorque.im
+        .divideScalar(boatInertiaMoment)
+        .length()
+    );
+    */
+
     Body.applyForce(
       this.rutterBody,
-      this.rutterBody.position,
+      {...this.rutterBody.position, y: this.rutterBody.position.y-20 },
       rutterPush
     );
 
     // rutterTorque is netTorque
     const angularAcceleration = rutterTorque.divideScalar(boatInertiaMoment);
-
-    // TODO: need to use proper angular velocity perhaps
-    boat.rotation += angularAcceleration.length() * delta * deltaFac;
 
     const boomNorm = rotateVecZ(boomDir, Math.PI/2);
     drawArrow({
@@ -292,31 +299,14 @@ class Boat {
       scene: ctx.scene,
       color: "#ff00ff"
     });
-    // TODO: use a dot product factor on the force on the boat
-    // to simulate the push area of the keel
 
-    const linearAcceleration = windPush.im.divideScalar(boat.mass);
-
-    // simulate drag with smoothing or clamping or force?
-    let dragForce;
-
-    const rawNextVelocity = (
-      velocity.clone().add(
-        linearAcceleration.clone().multiplyScalar(delta*deltaFac)
-      )
-    ).clampLength(-5, 5);
-
-    //const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
-    ctx.state.boat.velocity.set(...rawNextVelocity);
-
-    const newPosition = (
-      position.clone().add(
-        new V3(...rawNextVelocity, 0)
-          .multiplyScalar(delta*deltaFac)
-      )
+    Body.applyForce(
+      this.boomBody,
+      {...this.boomBody.position, y: this.boomBody.position.y-70 },
+      windPush
     );
 
-    this.root.position.set(...newPosition, 0);
+    //this.root.position.set(...newPosition, 0);
   } 
 
   tick(ctx, delta = 0) {
