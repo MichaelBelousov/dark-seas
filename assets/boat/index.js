@@ -102,43 +102,44 @@ class Boat {
   }
 
   spawnPhysics(world) {
-    const boat = world.createDynamicBody(pl.Vec2(0, 0));
-    boat.createFixture(pl.Polygon([
-        [-1, -1.4],
-        [-1.5, 0.6],
-        [-0.8, 0.9],
-        [-0.3, 1.2],
-        [0.0, 1.4],
-        [0.3, 1.2],
-        [0.8, 0.9],
-        [1.5, 0.6],
-        [1, -1.4],
-      ].map(a => pl.Vec2(...a))),
+    this.boatBody = world.createDynamicBody(pl.Vec2(0, 0));
+    this.boatBody.createFixture(pl.Polygon([
+        [-0.5, -1.4],
+        [-0.7,  0.6],
+        [-0.5,  0.9],
+        [-0.2,  1.2],
+        [ 0.0,  1.4],
+        [ 0.2,  1.2],
+        [ 0.5,  0.9],
+        [ 0.7,  0.6],
+        [ 0.5, -1.4],
+        // TODO: apply that scaling there to source points
+      ].map(a => pl.Vec2(...a.map(x=>2*x)))),
       { 
         density: 1.0,
         friction: 0.5,
       }
     );
-    const rutter = world.createDynamicBody(pl.Vec2(0, -10));
-    rutter.createFixture(pl.Polygon([
-      [-0.2, -1.4],
-      [-0.2, -1.7],
-      [0.2, -1.7],
-      [0.2, -1.4]
+    this.rutterBody = world.createDynamicBody(pl.Vec2(0, -1.7));
+    this.rutterBody.createFixture(pl.Polygon([
+      [-0.2,  0.0],
+      [-0.2, -2.0],
+      [ 0.2, -2.0],
+      [ 0.2,  0.0],
     ].map(a => pl.Vec2(...a))), {
       density: 1.0
     });
-    const boom = world.createDynamicBody(pl.Vec2(0, 0));
-    boom.createFixture(pl.Polygon([
+    this.boomBody = world.createDynamicBody(pl.Vec2(0, 0));
+    this.boomBody.createFixture(pl.Polygon([
         [-0.2, 0],
-        [-0.2, -2.0],
-        [0.2, -2.0],
+        [-0.2, -4.0],
+        [0.2, -4.0],
         [0.2, 0],
       ].map(a => pl.Vec2(...a))),
       { density: 1.0, }
     );
-    world.createJoint(pl.RevoluteJoint({}, boat, rutter, pl.Vec2(0, 0)));
-    world.createJoint(pl.RevoluteJoint({}, boat, boom, pl.Vec2(0, 0)));
+    world.createJoint(pl.RevoluteJoint({}, this.boatBody, this.rutterBody, pl.Vec2(0, -2.0)));
+    world.createJoint(pl.RevoluteJoint({}, this.boatBody, this.boomBody, pl.Vec2(0, 0)));
   }
 
   drawPhysicsState(ctx, delta) {
@@ -185,7 +186,7 @@ class Boat {
 
     ctx.state.boat.position = this.root.position;
 
-    const {
+    let {
       wind: { velocity: windV },
       sea: { velocity: seaV },
       boat: {
@@ -254,6 +255,10 @@ class Boat {
       scene: ctx.scene,
       color: '#ffffff',
     });
+
+    this.rutterBody.applyForceToCenter(pl.Vec2(...rutterPush));
+
+    //this.rutterBody.applyForceToCenter
 
     const rutterDistanceFromBoatCenterOfMass = 3; //meters
 

@@ -103,13 +103,18 @@ Window.addEventListener
       testbed.speed = 1.3;
       testbed.hz = 50;
       ctx.testbed = testbed;
-
-      const delta = clock.getDelta();
-      tickLogic(delta);
       //renderer.render(ctx.scene, ctx.camera);
-      physicsWorld.step(delta);
+
+      const tickGame = () => {
+        const delta = clock.getDelta();
+        //physicsWorld.step(delta);
+        tickLogic(delta);
+        requestAnimationFrame(tickGame); // loop
+      };
+
+      tickGame();
+
       return physicsWorld;
-      //requestAnimationFrame(tickGame); // loop
     });
 
     //tickGame();
