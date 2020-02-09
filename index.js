@@ -2,12 +2,12 @@
 //import THREE from "three.js";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
 import MainLevel from "./levels/main.js";
-import planck from "https://cdn.jsdelivr.net/npm/planck-js@0.2/dist/planck-with-testbed.js";
+const pl = window.planck;
 
 (async () => {
   await MainLevel.load();
 
-  const physicsWorld = planck.World({ gravity: planck.Vec2(0,0) });
+  const physicsWorld = pl.World({ gravity: pl.Vec2(0,0) });
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -97,20 +97,22 @@ Window.addEventListener
   };
 
   const run = () => {
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    var cube = new THREE.Mesh(geometry, material);
-    //ctx.scene.add(cube);
 
-    const tickGame = () => {
+    //const tickGame = () => {
+    pl.testbed('dark-seas', (testbed) => {
+      testbed.speed = 1.3;
+      testbed.hz = 50;
+      ctx.testbed = testbed;
+
       const delta = clock.getDelta();
       tickLogic(delta);
-      renderer.render(ctx.scene, ctx.camera);
+      //renderer.render(ctx.scene, ctx.camera);
       physicsWorld.step(delta);
-      requestAnimationFrame(tickGame); // loop
-    };
+      return physicsWorld;
+      //requestAnimationFrame(tickGame); // loop
+    });
 
-    tickGame();
+    //tickGame();
   };
 
   run();

@@ -15,6 +15,7 @@ export class MainLevel {
   constructor (ctx) {
     this.physicsWorld = ctx.physicsWorld;
     this.scene = ctx.scene = new THREE.Scene();
+    this.physicsWorld = ctx.physicsWorld;
     this.camera = ctx.camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -28,7 +29,7 @@ export class MainLevel {
     // XXX: uses a partial context just for this object that
     // we know will work
     this.water = new Water(ctx);
-    this.boat = new Boat(ctx);
+    this.boat = this.spawn(Boat);
     this.player = new Player(ctx);
     
 
@@ -52,8 +53,8 @@ export class MainLevel {
   }
 
   spawn(Type) {
-    const instance = new Type(scene);
-    instance.spawnPhysics(world);
+    const instance = new Type(this.scene);
+    instance.spawnPhysics(this.physicsWorld);
     return instance;
   }
 

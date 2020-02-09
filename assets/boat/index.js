@@ -8,7 +8,8 @@ import {
   smoothClampCurve,
   reflectedVec
 } from "../../util.js";
-import planck from "https://cdn.jsdelivr.net/npm/planck-js@0.2/dist/planck-with-testbed.js";
+import "https://cdn.jsdelivr.net/npm/planck-js@0.2/dist/planck-with-testbed.js";
+const pl = window.planck;
 
 const V3 = THREE.Vector3;
 const V2 = THREE.Vector2;
@@ -101,12 +102,43 @@ class Boat {
   }
 
   spawnPhysics(world) {
-    const boatBody = world.createBody({
-      type: 'dynamic',
+    const boat = world.createDynamicBody(pl.Vec2(0, 0));
+    boat.createFixture(pl.Polygon([
+        [-1, -1.4],
+        [-1.5, 0.6],
+        [-0.8, 0.9],
+        [-0.3, 1.2],
+        [0.0, 1.4],
+        [0.3, 1.2],
+        [0.8, 0.9],
+        [1.5, 0.6],
+        [1, -1.4],
+      ].map(a => pl.Vec2(...a))),
+      { 
+        density: 1.0,
+        friction: 0.5,
+      }
+    );
+    const rutter = world.createDynamicBody(pl.Vec2(0, -10));
+    rutter.createFixture(pl.Polygon([
+      [-0.2, -1.4],
+      [-0.2, -1.7],
+      [0.2, -1.7],
+      [0.2, -1.4]
+    ].map(a => pl.Vec2(...a))), {
+      density: 1.0
     });
-    const boatFixt = boatBody.createFixture({
-      shape: planck.Box(planck.Vec2(0,0), planck.Vec2(40, 40));
-    });
+    const boom = world.createDynamicBody(pl.Vec2(0, 0));
+    boom.createFixture(pl.Polygon([
+        [-0.2, 0],
+        [-0.2, -2.0],
+        [0.2, -2.0],
+        [0.2, 0],
+      ].map(a => pl.Vec2(...a))),
+      { density: 1.0, }
+    );
+    world.createJoint(pl.RevoluteJoint({}, boat, rutter, pl.Vec2(0, 0)));
+    world.createJoint(pl.RevoluteJoint({}, boat, boom, pl.Vec2(0, 0)));
   }
 
   drawPhysicsState(ctx, delta) {
