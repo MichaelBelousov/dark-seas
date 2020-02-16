@@ -102,12 +102,14 @@ Window.addEventListener
     pl.testbed('dark-seas', (testbed) => {
       testbed.speed = 1.3;
       testbed.hz = 50;
+      window.DEBUG = false;
+      testbed.debug = false;
       ctx.testbed = testbed;
       //renderer.render(ctx.scene, ctx.camera);
 
       const tickGame = () => {
         const delta = clock.getDelta();
-        //physicsWorld.step(delta);
+        physicsWorld.step(delta);
         tickLogic(delta);
         requestAnimationFrame(tickGame); // loop
       };

@@ -14,6 +14,9 @@ const pl = window.planck;
 const V3 = THREE.Vector3;
 const V2 = THREE.Vector2;
 
+const origin = new V2();
+const posXAxis = new V2(1, 0);
+
 const deltaFac = 1;
 
 // TODO: move to monkeypatch module
@@ -140,104 +143,19 @@ class Boat {
     );
     world.createJoint(pl.RevoluteJoint({}, this.boatBody, this.rutterBody, pl.Vec2(0, -2.0)));
     world.createJoint(pl.RevoluteJoint({}, this.boatBody, this.boomBody, pl.Vec2(0, 0)));
-  }
-
-  drawPhysicsState(ctx, delta) {
-    const { state } = ctx;
-    drawArrow({
-      from: state.boat.position,
-      arrow: state.boat.orientation,
-      handle: "boatDir",
-      scene: ctx.scene,
-      color: "#ff0000"
-    });
-    drawArrow({
-      from: state.boat.position,
-      arrow: state.boat.boom.orientation,
-      handle: "boomDir",
-      scene: ctx.scene,
-      color: "#ffff00"
-    });
-    drawArrow({
-      from: state.boat.position,
-      arrow: state.wind.velocity,
-      handle: "wind",
-      scene: ctx.scene,
-    });
-    drawArrow({
-      from: state.boat.position,
-      arrow: state.sea.velocity,
-      handle: "sea",
-      scene: ctx.scene,
-    });
-    drawArrow({
-      from: state.boat.position,
-      arrow: state.boat.velocity,
-      handle: "boatVelocity",
-      scene: ctx.scene,
-      color: '#0000ff',
+    document.addEventListener('mousemove', e => {
+      e.preventDefault();
+      const { x, y } = e;
+      const mid = { x: window.innerWidth, y: window.innerHeight };
+      const nextBoomDir = new V2(x-mid.x, y-mid.y);
+      this.boomBody.setTransform(this.boomBody.getPosition(), nextBoomDir.angle());
     });
   }
 
   tickPhysics(ctx, delta) {
-    this.drawPhysicsState(ctx, delta);
-
     if (!this.root) return;
 
-    ctx.state.boat.position = this.root.position;
-
-    let {
-      wind: { velocity: windV },
-      sea: { velocity: seaV },
-      boat: {
-        orientation: boatDir,
-        boom: {
-          orientation: boomDir,
-        },
-        position,
-        velocity,
-        rutter,
-        ...boat
-      },
-      input: {
-        tillerFromLeftPercent: tillerInput,
-      }
-    } = ctx.state;
-
-    const tillerMaxTurnAngle = Math.PI/3;
-    const negBoatDir = boatDir.clone().negate();
-
-    const tillerDir = rotateVecZ(
-      boatDir,
-      (tillerInput - 0.5) * tillerMaxTurnAngle
-    ).negate();
-    drawArrow({
-      from: position,
-      arrow: tillerDir,
-      handle: "tillerDir",
-      scene: ctx.scene,
-    });
-
-    //pick the normal that the sea velocity hits
-    const tillerNorm = rotateVecZ(tillerDir, Math.PI/2);
-    if (tillerNorm.dot(seaV) < 0)
-      tillerNorm.negate();
-
-    drawArrow({
-      from: position,
-      arrow: tillerNorm,
-      handle: "tillerNorm",
-      scene: ctx.scene,
-    });
-
-    // velocity of the water relative to the boat
-    const waterRelativeV = seaV.clone().sub(velocity);
-    drawArrow({
-      from: position,
-      arrow: waterRelativeV,
-      handle: "waterRelativeV",
-      scene: ctx.scene,
-    });
+    const boatDir = posXAxis.im.rotateAround(origin, this.boatBody.getAngle());
 
     // as the boat moves through water, the rutter is "hit" by
     // water which imposes a force, we use the dot product to
@@ -245,84 +163,20 @@ class Boat {
     // the force
     // we take the absolute value of the dot product since the
     // force direction doesn't invert when the side of the rutter does
-    const rutterArea = Math.abs(waterRelativeV.dot(tillerNorm));
+    //const rutterArea = Math.abs(waterRelativeV.dot(tillerNorm));
 
-    const rutterPush = waterRelativeV.clone().setLength(rutterArea);
-    drawArrow({
-      from: position,
-      arrow: rutterPush,
-      handle: "rutterPush",
-      scene: ctx.scene,
-      color: '#ffffff',
-    });
+    //const rutterPush = waterRelativeV.clone().setLength(rutterArea);
 
-    this.rutterBody.applyForceToCenter(pl.Vec2(...rutterPush));
+    const boomNorm = posXAxis.im.rotateAround(origin, this.boomBody.getAngle());
+    const windMagnitude = ctx.state.wind.velocity.dot(boomNorm);
+    // this should be fought by drag from the keel
+    //const windPush=reflectedVec(ctx.state.wind.velocity,boomNorm).negate();
+    const windPush = boatDir.multiplyScalar(windMagnitude);
 
-    //this.rutterBody.applyForceToCenter
+    this.boomBody.applyForceToCenter(pl.Vec2(...windPush), true);
 
-    const rutterDistanceFromBoatCenterOfMass = 3; //meters
 
-    // using solid cylinder moment of inertia
-    const boatInertiaMoment = (
-      (boat.mass*boat.hull.depth**2)/4
-      + (boat.mass*boat.hull.length**2)/12
-    );
-
-    const boatRutterRadius =
-      boatDir.clone().negate().setLength(boat.hull.length/2);
-
-    const rutterTorque = (
-      new V3(...boatRutterRadius, 0).cross(new V3(...rutterPush, 0))
-    );
-
-    // rutterTorque is netTorque
-    const angularAcceleration = rutterTorque.divideScalar(boatInertiaMoment);
-
-    // TODO: need to use proper angular velocity perhaps
-    boat.rotation += angularAcceleration.length() * delta * deltaFac;
-
-    const boomNorm = rotateVecZ(boomDir, Math.PI/2);
-    drawArrow({
-      from: position,
-      arrow: boomNorm,
-      handle: "boomNorm",
-      scene: ctx.scene,
-      color: "#ff00af"
-    });
-
-    const windPush = reflectedVec(windV, boomNorm).negate();
-    drawArrow({
-      from: position,
-      arrow: windPush,
-      handle: "windPush",
-      scene: ctx.scene,
-      color: "#ff00ff"
-    });
-    // TODO: use a dot product factor on the force on the boat
-    // to simulate the push area of the keel
-
-    const linearAcceleration = windPush.im.divideScalar(boat.mass);
-
-    // simulate drag with smoothing or clamping or force?
-    let dragForce;
-
-    const rawNextVelocity = (
-      velocity.clone().add(
-        linearAcceleration.clone().multiplyScalar(delta*deltaFac)
-      )
-    ).clampLength(-5, 5);
-
-    //const smoothedNextVelocity = smoothClampCurve(rawNextVelocity, maxVelocity);
-    ctx.state.boat.velocity.set(...rawNextVelocity);
-
-    const newPosition = (
-      position.clone().add(
-        new V3(...rawNextVelocity, 0)
-          .multiplyScalar(delta*deltaFac)
-      )
-    );
-
-    this.root.position.set(...newPosition, 0);
+    //this.root.position.set(...newPosition, 0);
   } 
 
   tick(ctx, delta = 0) {
