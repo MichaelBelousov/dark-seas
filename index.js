@@ -98,11 +98,12 @@ Window.addEventListener
 
   const run = () => {
 
+    window.DEBUG = false;
+    pl.testbed.debug = false;
     //const tickGame = () => {
     pl.testbed('dark-seas', (testbed) => {
       testbed.speed = 1.3;
       testbed.hz = 50;
-      window.DEBUG = false;
       testbed.debug = false;
       ctx.testbed = testbed;
       //renderer.render(ctx.scene, ctx.camera);

@@ -17,6 +17,10 @@ const V2 = THREE.Vector2;
 const origin = new V2();
 const posXAxis = new V2(1, 0);
 
+const boatBit =     0b001
+const rutterBit =   0b010
+const boomBit =     0b100
+
 const deltaFac = 1;
 
 // TODO: move to monkeypatch module
@@ -81,6 +85,8 @@ class Boat {
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
 
+    this.mousePos = {x:0, y:0};
+
     const result = gltfLoader.load(resources.model.path,
       gltf => {
         //this.root = gltf.scene;
@@ -105,6 +111,7 @@ class Boat {
   }
 
   spawnPhysics(world) {
+    // TODO: spawn as awake so forces don't have to waken it!
     this.boatBody = world.createDynamicBody(pl.Vec2(0, 0));
     this.boatBody.createFixture(pl.Polygon([
         [-0.5, -1.4],
@@ -119,8 +126,10 @@ class Boat {
         // TODO: apply that scaling there to source points
       ].map(a => pl.Vec2(...a.map(x=>2*x)))),
       { 
-        density: 1.0,
+        density: 4.0,
         friction: 0.5,
+        filterMaskBits: ~(boomBit | rutterBit),
+        filterCategoryBits: boatBit
       }
     );
     this.rutterBody = world.createDynamicBody(pl.Vec2(0, -1.7));
@@ -130,7 +139,9 @@ class Boat {
       [ 0.2, -2.0],
       [ 0.2,  0.0],
     ].map(a => pl.Vec2(...a))), {
-      density: 1.0
+      density: 1.0,
+      filterMaskBits: ~(boomBit | boatBit),
+      filterCategoryBits: rutterBit
     });
     this.boomBody = world.createDynamicBody(pl.Vec2(0, 0));
     this.boomBody.createFixture(pl.Polygon([
@@ -139,16 +150,34 @@ class Boat {
         [0.2, -4.0],
         [0.2, 0],
       ].map(a => pl.Vec2(...a))),
-      { density: 1.0, }
+      {
+        density: 1.0,
+        filterMaskBits: ~(rutterBit | boatBit),
+        filterCategoryBits: boomBit,
+      }
     );
-    world.createJoint(pl.RevoluteJoint({}, this.boatBody, this.rutterBody, pl.Vec2(0, -2.0)));
+    world.createJoint(pl.RevoluteJoint({
+      enableLimit: true,
+      lowerAngle: -Math.PI/3,
+      upperAngle: Math.PI/3,
+    }, this.boatBody, this.rutterBody, pl.Vec2(0, -2.0)));
     world.createJoint(pl.RevoluteJoint({}, this.boatBody, this.boomBody, pl.Vec2(0, 0)));
     document.addEventListener('mousemove', e => {
       e.preventDefault();
-      const { x, y } = e;
-      const mid = { x: window.innerWidth, y: window.innerHeight };
-      const nextBoomDir = new V2(x-mid.x, y-mid.y);
-      this.boomBody.setTransform(this.boomBody.getPosition(), nextBoomDir.angle());
+      this.mousePos.x = e.x;
+      this.mousePos.y = e.y;
+    });
+    document.addEventListener('keydown', e => {
+      e.preventDefault();
+      const rutterControlImpulse = 1;
+      switch (e.key) {
+        case 'a':
+          this.rutterBody.applyAngularImpulse(rutterControlImpulse);
+          break;
+        case 'd':
+          this.rutterBody.applyAngularImpulse(-rutterControlImpulse);
+          break;
+      }
     });
   }
 
@@ -172,6 +201,7 @@ class Boat {
     // this should be fought by drag from the keel
     //const windPush=reflectedVec(ctx.state.wind.velocity,boomNorm).negate();
     const windPush = boatDir.multiplyScalar(windMagnitude);
+    //drawArrow
 
     this.boomBody.applyForceToCenter(pl.Vec2(...windPush), true);
 
@@ -180,9 +210,22 @@ class Boat {
   } 
 
   tick(ctx, delta = 0) {
-    //this.root.rotation.x += delta * 0.5;
+    this.ctx = ctx;
     this.uniforms.time.value += delta;
     this.tickPhysics(ctx, delta);
+    //this.root.rotation = this.boatBody.getAngle();
+    //this.root.position = new V2(...this.boatBody.getAngle());
+    const boatPos = this.boatBody.getPosition();
+    ctx.testbed.x = boatPos.x;
+    ctx.testbed.y = boatPos.y;
+
+    const mid = { x: window.innerWidth/2, y: window.innerHeight/2 };
+    this.ctx.testbed.drawPoint(this.mousePos.x, this.mousePos.y);
+    // when using three.js camera, will unproject from camera transform:
+    // new V3(mouse.x, mouse.y, -1).unproject(camera)
+    const nextBoomDir = new V2(this.mousePos.x-mid.x, -(this.mousePos.y-mid.y));
+    nextBoomDir.rotateAround(origin, Math.PI/2);
+    this.boomBody.setTransform(this.boomBody.getPosition(), nextBoomDir.angle());
   }
 };
 
