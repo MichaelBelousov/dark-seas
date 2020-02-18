@@ -90,6 +90,7 @@ class Boat {
         console.error('ERROR:', err);
       }
     );
+    
     this.uniforms = {
       time: { value: 0 },
       lightPos: { value: new V2(0.0, 0.0) },

@@ -104,7 +104,7 @@ Window.addEventListener
       testbed.hz = 50;
       ctx.testbed = testbed;
       //renderer.render(ctx.scene, ctx.camera);
-
+      ctx.camera.lookAt(ctx.state.boat); //https://jsfiddle.net/Fyrestar/6519yedL/
       const tickGame = () => {
         const delta = clock.getDelta();
         //physicsWorld.step(delta);
