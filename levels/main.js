@@ -16,15 +16,17 @@ export class MainLevel {
     this.physicsWorld = ctx.physicsWorld;
     this.scene = ctx.scene = new THREE.Scene();
     this.physicsWorld = ctx.physicsWorld;
+    
+    
+    //Camera
     this.camera = ctx.camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    this.camera.position.set(0, 0, 100);
-    this.scene.add(this.camera);
 
+    
     // background
     this.scene.background = new THREE.Color(0x202020);
     // XXX: uses a partial context just for this object that
