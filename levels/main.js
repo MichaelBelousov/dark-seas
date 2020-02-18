@@ -12,7 +12,7 @@ export class MainLevel {
     await Player.load();
   }
 
-  constructor (ctx) {
+  constructor(ctx) {
     this.physicsWorld = ctx.physicsWorld;
     this.scene = ctx.scene = new THREE.Scene();
     this.physicsWorld = ctx.physicsWorld;
@@ -22,7 +22,8 @@ export class MainLevel {
       0.1,
       1000
     );
-    this.camera.position.z = 5;
+    this.camera.position.set(0, 0, 100);
+    this.scene.add(this.camera);
 
     // background
     this.scene.background = new THREE.Color(0x202020);
@@ -31,7 +32,7 @@ export class MainLevel {
     this.water = new Water(ctx);
     this.boat = this.spawn(Boat);
     this.player = new Player(ctx);
-    
+
 
     // lighting
     const hemi = new THREE.HemisphereLight(0x443333, 0x111122);
