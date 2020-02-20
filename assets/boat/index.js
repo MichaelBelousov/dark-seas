@@ -170,10 +170,10 @@ class Boat {
     });
     document.addEventListener('keydown', e => {
       e.preventDefault();
-      const rutterControlImpulse = 1;
+      const rutterControlImpulse = 0.1;
       switch (e.key) {
         case 'a':
-          this.rutterBody.applyAngularImpulse(rutterControlImpulse);
+          this.rutterBody.applyAngularImpulse(rutterControlImpulse+= 0.1);
           break;
         case 'd':
           this.rutterBody.applyAngularImpulse(-rutterControlImpulse);

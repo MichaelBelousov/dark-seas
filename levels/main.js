@@ -1,5 +1,6 @@
 
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js";
+import {OrbitControls} from "https://threejsfundamentals.org/threejs/resources/threejs/r113/examples/jsm/controls/OrbitControls.js";
 import Water from "../assets/water/index.js";
 import Boat from "../assets/boat/index.js";
 import Player from "../assets/player/index.js";
@@ -26,6 +27,9 @@ export class MainLevel {
       1000
     );
 
+    function updateCamera() {
+      camera.updateProjectionMatrix();
+    }
     
     // background
     this.scene.background = new THREE.Color(0x202020);
