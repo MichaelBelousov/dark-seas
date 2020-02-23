@@ -169,11 +169,12 @@ class Boat {
       this.mousePos.y = e.y;
     });
     document.addEventListener('keydown', e => {
+      //TODO: use a motor instead
       e.preventDefault();
       const rutterControlImpulse = 0.1;
       switch (e.key) {
         case 'a':
-          this.rutterBody.applyAngularImpulse(rutterControlImpulse+= 0.1);
+          this.rutterBody.applyAngularImpulse(rutterControlImpulse);
           break;
         case 'd':
           this.rutterBody.applyAngularImpulse(-rutterControlImpulse);
@@ -221,7 +222,6 @@ class Boat {
     ctx.testbed.y = boatPos.y;
 
     const mid = { x: window.innerWidth/2, y: window.innerHeight/2 };
-    this.ctx.testbed.drawPoint(this.mousePos.x, this.mousePos.y);
     // when using three.js camera, will unproject from camera transform:
     // new V3(mouse.x, mouse.y, -1).unproject(camera)
     const nextBoomDir = new V2(this.mousePos.x-mid.x, -(this.mousePos.y-mid.y));

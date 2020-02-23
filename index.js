@@ -107,7 +107,6 @@ const pl = window.planck;
       ctx.testbed = testbed;
       //renderer.render(ctx.scene, ctx.camera);
       //ctx.camera.lookAt(ctx.state.boat); //https://jsfiddle.net/Fyrestar/6519yedL/
-      //ctx.camera.lookAt(ctx.state);
       
       const tickGame = () => {
         const delta = clock.getDelta();

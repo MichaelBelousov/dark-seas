@@ -41,8 +41,9 @@ const liveArrows = {};
  * }} namedArgs
  */
 export const drawArrow = ({ from, to, arrow, color, handle, scene }) => {
-  from = from ?? new THREE.Vector3();
-  color = color ?? (handle ? colorHash(handle) : "#ff0000");
+  // TODO: switch to typescript and use nullish coalescing operator
+  from = from || new THREE.Vector3();
+  color = color || (handle ? colorHash(handle) : "#ff0000");
   if (to) arrow = to.clone().sub(from); 
   if (arrow instanceof THREE.Vector2) arrow = new THREE.Vector3(...arrow, 0);
   if (from instanceof THREE.Vector2) from = new THREE.Vector3(...arrow, 0);

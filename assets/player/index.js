@@ -22,7 +22,6 @@ class Player {
     document.addEventListener('mousemove', e => {
       e.preventDefault();
       const { x, y } = e;
-      if (ctx.testbed) ctx.testbed.drawPoint(x, y);
       const mid = { x: window.innerWidth, y: window.innerHeight };
       this.mouseLoc = new THREE.Vector2(x, y);
     });
