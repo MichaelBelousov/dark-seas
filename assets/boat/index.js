@@ -8,7 +8,6 @@ import {
   smoothClampCurve,
   reflectedVec
 } from "../../util.js";
-import "https://cdn.jsdelivr.net/npm/planck-js@0.2/dist/planck-with-testbed.js";
 const pl = window.planck;
 
 const V3 = THREE.Vector3;
@@ -218,8 +217,6 @@ class Boat {
     //this.root.rotation = this.boatBody.getAngle();
     //this.root.position = new V2(...this.boatBody.getAngle());
     const boatPos = this.boatBody.getPosition();
-    ctx.testbed.x = boatPos.x;
-    ctx.testbed.y = boatPos.y;
 
     const mid = { x: window.innerWidth/2, y: window.innerHeight/2 };
     // when using three.js camera, will unproject from camera transform:
