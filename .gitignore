@@ -5,20 +5,6 @@
 # Idle source
 #Plugins/AdvancedSessions
 
-# Binary Art Source Files
-*.dae
-*.ies
-*.max
-*.png
-*.tga
-*.jpg
-*.dwg
-*.fbx
-*.psd
-*.dds
-*.hdr
-*.wav
-
 # Packages
 *.7z
 *.dmg
